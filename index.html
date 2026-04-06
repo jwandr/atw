@@ -280,7 +280,7 @@ function buildSegment(p1, p2, startMode = null, endMode = null) {
       const offset = 14;
       switch (pos) {
         case "above": return { dx: 0, dy: -offset, anchor: "middle" };
-        case "below": return { dx: 0, dy: offset + 4, anchor: "middle" };
+        case "below": return { dx: 0, dy: offset + 8, anchor: "middle" };
         case "left": return { dx: -offset, dy: 4, anchor: "end" };
         default: return { dx: offset, dy: 4, anchor: "start" };
       }
