@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Around The World in 1080 Days</title>
+  <title>Stylised Route Map (Clean Joins)</title>
   <style>
     body { font-family: Arial, sans-serif; background:#f5f5f5; margin:0; padding:0px; text-align:center; }
 
@@ -20,12 +20,12 @@
 </head>
 <body>
 
-  
+
 
   <div class="map-container">
-    <img id="mapImage" src="maps.001.png" alt="Map">
+    <img id="mapImage" src="maps/maps.001.png" alt="Map">
     <svg id="overlay"></svg>
-    <div class="controls">
+      <div class="controls">
     <label><input type="checkbox" checked onchange="drawRoutes()" id="toggleYear1"> Year 1</label>
     <label><input type="checkbox" checked onchange="drawRoutes()" id="toggleYear2"> Year 2</label>
     <label><input type="checkbox" checked onchange="drawRoutes()" id="toggleYear3"> Year 3</label>
@@ -276,11 +276,11 @@ function buildSegment(p1, p2, startMode = null, endMode = null) {
     }
 
     function getLabelOffset(pos) {
-      const offset = 14;
       const viewWidth = window.innerWidth;
+      const offset = (viewWidth / 100) + 1;
       switch (pos) {
         case "above": return { dx: 0, dy: -offset, anchor: "middle" };
-        case "below": return { dx: 0, dy: offset + viewWidth/200, anchor: "middle" };
+        case "below": return { dx: 0, dy: offset * 1.5, anchor: "middle" };
         case "left": return { dx: -offset, dy: 4, anchor: "end" };
         default: return { dx: offset, dy: 4, anchor: "start" };
       }
@@ -323,7 +323,7 @@ const constrained = buildSegment(p1, p2, startMode, endMode);
           const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
           path.setAttribute("d", roundedPath(constrained, 6));
           path.setAttribute("stroke", route.color);
-          path.setAttribute("stroke-width", 6);
+          path.setAttribute("stroke-width", (width/400) + 3);
           path.setAttribute("fill", "none");
           path.setAttribute("stroke-linecap", "round");
 
@@ -337,10 +337,10 @@ const constrained = buildSegment(p1, p2, startMode, endMode);
           const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
           circle.setAttribute("cx", cx);
           circle.setAttribute("cy", cy);
-          circle.setAttribute("r", 8);
+          circle.setAttribute("r", (width/200)+ 2);
           circle.setAttribute("fill", "white");
           circle.setAttribute("stroke", route.color);
-          circle.setAttribute("stroke-width", 4);
+          circle.setAttribute("stroke-width", (width/600) + 2);
           svg.appendChild(circle);
 
           if (showLabels) {
