@@ -15,59 +15,68 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Install dependencies
+        run: pip install requests --break-system-packages
+
       - name: Fetch and cache Smartraveller data
         run: |
-          set -e
-
-          echo "=== Fetching Smartraveller ==="
-          HTTP_CODE=$(curl -s \
-            --max-time 30 \
-            --retry 3 \
-            --retry-delay 5 \
-            -H "Accept: application/json" \
-            -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" \
-            -w "%{http_code}" \
-            -o /tmp/smartraveller-raw.json \
-            "https://www.smartraveller.gov.au/destinations-export")
-
-          echo "HTTP status: $HTTP_CODE"
-          echo "Response size: $(wc -c < /tmp/smartraveller-raw.json) bytes"
-          echo "First 300 chars of response:"
-          head -c 300 /tmp/smartraveller-raw.json || true
-          echo ""
-
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "ERROR: HTTP $HTTP_CODE — skipping cache update"
-            exit 0
-          fi
-
-          echo "=== Transforming to keyed cache ==="
           python3 << 'PYEOF'
-          import json, sys, datetime, os
+          import json, sys, datetime, os, time
+          import requests
 
-          raw_path = '/tmp/smartraveller-raw.json'
+          URL = "https://www.smartraveller.gov.au/destinations-export"
 
-          # Read and inspect
-          with open(raw_path, 'rb') as f:
-              raw_bytes = f.read()
-          print(f"Raw bytes: {len(raw_bytes)}")
-          print(f"First 200 chars: {raw_bytes[:200]}")
+          HEADERS = {
+              "Accept": "application/json, text/plain, */*",
+              "Accept-Language": "en-AU,en;q=0.9",
+              "User-Agent": (
+                  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/124.0.0.0 Safari/537.36"
+              ),
+              "Referer": "https://www.smartraveller.gov.au/",
+          }
 
-          # Parse
-          try:
-              data = json.loads(raw_bytes)
-          except json.JSONDecodeError as e:
-              print(f"JSON parse failed: {e}")
-              print("Smartraveller may be returning HTML/error page. Skipping update.")
+          data = None
+          last_error = None
+
+          for attempt in range(1, 4):
+              try:
+                  print(f"Attempt {attempt}…")
+                  # Force HTTP/1.1 to avoid HTTP/2 stream errors (exit code 92)
+                  resp = requests.get(URL, headers=HEADERS, timeout=30)
+                  print(f"  Status: {resp.status_code}  Size: {len(resp.content)} bytes")
+                  print(f"  First 200 chars: {resp.text[:200]}")
+
+                  if resp.status_code != 200:
+                      last_error = f"HTTP {resp.status_code}"
+                      time.sleep(5)
+                      continue
+
+                  data = resp.json()
+                  break
+
+              except requests.exceptions.JSONDecodeError as e:
+                  print(f"  JSON decode failed: {e}")
+                  last_error = str(e)
+                  time.sleep(5)
+              except Exception as e:
+                  print(f"  Request failed: {e}")
+                  last_error = str(e)
+                  time.sleep(5)
+
+          if data is None:
+              print(f"All attempts failed. Last error: {last_error}")
+              print("Skipping cache update — existing cache retained.")
               sys.exit(0)
 
           if not isinstance(data, list):
-              print(f"Unexpected type: {type(data)} — expected list. Skipping update.")
+              print(f"Unexpected response type: {type(data)} — expected list.")
+              print("Skipping cache update.")
               sys.exit(0)
 
           print(f"Parsed {len(data)} entries")
 
-          # Build keyed cache
           cache = {}
           for entry in data:
               name = entry.get('name')
@@ -76,18 +85,18 @@ jobs:
           cache['_fetched_at'] = datetime.datetime.utcnow().isoformat() + 'Z'
           cache['_count'] = len(cache) - 1
 
-          # Find the right output path (handles repo-in-subfolder layout)
           candidates = [
               'data/safety-cache.json',
-              'travel-guide/data/safety-cache.json',
+              'travel-guides/data/safety-cache.json',
           ]
           target = None
           for p in candidates:
               if os.path.isdir(os.path.dirname(p)):
                   target = p
                   break
+
           if not target:
-              print(f"Could not find data/ folder. Dirs present: {os.listdir('.')}")
+              print(f"Could not find data/ folder. Dirs: {os.listdir('.')}")
               sys.exit(0)
 
           with open(target, 'w') as f:
