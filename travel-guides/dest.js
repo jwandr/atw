@@ -1,5 +1,5 @@
 /**
- * dest.js — Shared rendering engine for all destination pages.
+ * dest.js — Shared rendering engine for all destination pages. (v2)
  * Each destinations/XXX.html sets <body data-dest="XXX">.
  */
 
@@ -28,19 +28,19 @@
   function shimmer(w, h) {
     return el('div', {
       class: 'shimmer',
-      style: `width:${w||'100%'};height:${h||'13px'};border-radius:4px;margin:4px 0;`
+      style: `width:${w || '100%'};height:${h || '12px'};border-radius:4px;margin:4px 0;`
     });
   }
 
   // ─── Safety maps ─────────────────────────────────────────────────────────
 
-  const SAFETY_CLASS = { 1:'safe', 2:'caution', 3:'warn', 4:'danger' };
-  const SAFETY_ICON  = { 1:'check_circle', 2:'info', 3:'warning', 4:'dangerous' };
+  const SAFETY_CLASS = { 1: 'safe', 2: 'caution', 3: 'warn', 4: 'danger' };
+  const SAFETY_ICON  = { 1: 'check_circle', 2: 'info', 3: 'warning', 4: 'dangerous' };
 
   // ─── Builders ────────────────────────────────────────────────────────────
 
   function sectionTitle(iconName, label) {
-    return el('div', { class: 'section-title' }, icon(iconName), label);
+    return el('div', { class: 'section-title' }, icon(iconName, 'icon-sm'), label);
   }
 
   function section(iconName, label, ...children) {
@@ -52,7 +52,7 @@
   }
 
   function panelTitle(iconName, label) {
-    return el('div', { class: 'panel-title' }, icon(iconName), label);
+    return el('div', { class: 'panel-title' }, icon(iconName, 'icon-sm'), label);
   }
 
   // ─── Main render ─────────────────────────────────────────────────────────
@@ -60,13 +60,10 @@
   function render(d) {
     document.title = `${d.title} | Travel Guides`;
 
-    // Update header breadcrumb
     const crumb = document.getElementById('nav-crumb');
     if (crumb) crumb.textContent = d.title;
 
     const page = document.querySelector('.page');
-
-    // Keep the site-header, remove everything else
     const header = page.querySelector('.site-header');
     page.innerHTML = '';
     if (header) page.append(header);
@@ -105,10 +102,10 @@
 
     // Quick facts
     const facts = [
-      { ic: 'schedule',     label: 'Timezone',  val: d.quick_facts.timezone  },
-      { ic: 'travel_explore', label: 'Visa',    val: d.quick_facts.visa      },
-      { ic: 'record_voice_over', label: 'Language', val: d.quick_facts.language },
-      { ic: 'credit_card',  label: 'Payments',  val: d.quick_facts.payments  },
+      { ic: 'schedule',          label: 'Timezone',  val: d.quick_facts.timezone  },
+      { ic: 'travel_explore',    label: 'Visa',      val: d.quick_facts.visa      },
+      { ic: 'record_voice_over', label: 'Language',  val: d.quick_facts.language  },
+      { ic: 'credit_card',       label: 'Payments',  val: d.quick_facts.payments  },
     ];
     page.append(el('div', { class: 'quick-facts' },
       ...facts.map(f =>
@@ -122,7 +119,7 @@
       )
     ));
 
-    // Sidebar panels (rendered now, data filled async)
+    // Async panel placeholders
     const safetyPanelEl  = makeSafetyPanel();
     const weatherPanelEl = makeWeatherPanel();
     const ratePanelEl    = makeRatePanel(d);
@@ -132,13 +129,13 @@
       el('div', { class: 'grid' },
 
         el('div', {},
-          section('star',            'Why go',              cardList(d.why_go)),
-          section('hotel_class',     'Essential experiences', cardList(d.essential_experiences)),
+          section('star',              'Why go',                cardList(d.why_go)),
+          section('hotel_class',       'Essential experiences', cardList(d.essential_experiences)),
           renderSeasonality(d),
-          section('restaurant',      'Food & drink',        cardList(d.food_and_drink)),
-          section('directions',      'Logistics',           cardList(d.logistics)),
-          section('report',          'Friction factors',    cardList(d.friction_factors)),
-          section('tips_and_updates','Tips & watchouts',    cardList(d.tips)),
+          section('restaurant',        'Food & drink',          cardList(d.food_and_drink)),
+          section('directions',        'Logistics',             cardList(d.logistics)),
+          section('report',            'Friction factors',      cardList(d.friction_factors)),
+          section('tips_and_updates',  'Tips & watchouts',      cardList(d.tips)),
           renderItinerary(d),
         ),
 
@@ -159,7 +156,7 @@
       )
     );
 
-    // Async panel data
+    // Kick off async panels
     fetchSafety(d, safetyPanelEl);
     fetchWeather(d, weatherPanelEl);
     fetchRate(d, ratePanelEl);
@@ -175,9 +172,9 @@
     );
     const legend = el('div', { class: 'season-legend' },
       ...[
-        { cls: 'good', dot: '#86efac', label: 'Good' },
-        { cls: 'ok',   dot: '#fde047', label: 'OK'   },
-        { cls: 'bad',  dot: '#fca5a5', label: 'Avoid'},
+        { dot: '#86efac', label: 'Good' },
+        { dot: '#fde047', label: 'OK'   },
+        { dot: '#fca5a5', label: 'Avoid'},
       ].map(({ dot, label }) =>
         el('span', {},
           el('span', { class: 's-dot', style: `background:${dot}` }),
@@ -186,8 +183,7 @@
       )
     );
     const note = el('p', { class: 'season-note' }, d.seasonality_note);
-    const wrap = el('div', { class: 'months-wrap' }, months, legend, note);
-    return section('calendar_today', 'When to go', wrap);
+    return section('calendar_today', 'When to go', months, legend, note);
   }
 
   // ─── Itinerary ───────────────────────────────────────────────────────────
@@ -209,15 +205,15 @@
   function makeSafetyPanel() {
     return el('div', { class: 'panel caution', id: 'safety-panel' },
       panelTitle('shield', 'Safety advice'),
-      shimmer('65%', '15px'),
+      shimmer('65%', '14px'),
       shimmer('100%', '11px'),
-      shimmer('75%', '11px'),
+      shimmer('70%',  '11px'),
     );
   }
 
   function makeWaterPanel(w) {
-    const cls     = { safe:'safe', caution:'caution', unsafe:'danger' }[w.status] || 'caution';
-    const iconName = { safe:'water_drop', caution:'water_drop', unsafe:'do_not_disturb_on' }[w.status] || 'water_drop';
+    const cls      = { safe: 'safe', caution: 'caution', unsafe: 'danger' }[w.status] || 'caution';
+    const iconName = { safe: 'water_drop', caution: 'water_drop', unsafe: 'do_not_disturb_on' }[w.status] || 'water_drop';
     return el('div', { class: `panel ${cls}` },
       panelTitle(iconName, 'Water safety'),
       el('div', { class: 'badge' }, w.label),
@@ -229,7 +225,7 @@
     return el('div', { class: 'panel', id: 'weather-panel' },
       panelTitle('thermostat', 'Climate'),
       shimmer('80%', '11px'),
-      shimmer('100%', '60px'),
+      shimmer('100%', '58px'),
     );
   }
 
@@ -246,7 +242,6 @@
     try {
       let country;
 
-      // 1. Try nightly cache (written by GitHub Action)
       try {
         const r = await fetch('../data/safety-cache.json');
         if (r.ok) {
@@ -255,7 +250,6 @@
         }
       } catch (_) {}
 
-      // 2. Live fallback via CORS proxy
       if (!country) {
         const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.smartraveller.gov.au/destinations-export')}`;
         const r    = await fetch(proxy);
@@ -309,10 +303,10 @@
       const data = await fetch(url).then(r => r.json());
       if (!data.monthly) throw new Error('No data');
 
-      const MO  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const hi  = data.monthly.temperature_2m_max;
-      const lo  = data.monthly.temperature_2m_min;
-      const rn  = data.monthly.precipitation_sum;
+      const MO   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const hi   = data.monthly.temperature_2m_max;
+      const lo   = data.monthly.temperature_2m_min;
+      const rn   = data.monthly.precipitation_sum;
       const keys = [0, 3, 6, 9];
 
       const grid = el('div', { class: 'weather-grid' },
@@ -330,7 +324,7 @@
       panel.append(
         panelTitle('thermostat', 'Climate'),
         grid,
-        el('p', { style: 'margin-top:8px;font-size:0.74rem;' }, '30-yr averages · Jan / Apr / Jul / Oct'),
+        el('p', { style: 'margin-top:7px;font-size:0.72rem;' }, '30-yr averages · Jan / Apr / Jul / Oct'),
       );
     } catch (_) {
       panel.innerHTML = '';
@@ -357,14 +351,14 @@
         panelTitle('currency_exchange', `AUD → ${code}`),
         el('div', { class: 'rate-display' }, `${rate.toFixed(2)} ${code}`),
         el('div', { class: 'rate-sub' }, `per 1 AUD · ${d.currency.label} · live`),
-        el('p', { style: 'margin-top:6px;font-size:0.82rem;' },
+        el('p', { style: 'margin-top:5px;font-size:0.8rem;' },
           `100 AUD ≈ ${(rate * 100).toFixed(0)} ${code}`),
       );
     } catch (_) {
       panel.innerHTML = '';
       panel.append(
         panelTitle('currency_exchange', `AUD → ${code}`),
-        el('p', {}, `Rate unavailable.`),
+        el('p', {}, 'Rate unavailable.'),
         el('a', {
           href: `https://www.xe.com/currencyconverter/convert/?From=AUD&To=${code}`,
           target: '_blank', rel: 'noopener',
