@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Guide</title>
+  <link rel="stylesheet" href="guides.css">
+</head>
+<body>
+
+<div class="page">
+
+  <div class="index-hero">
+    <h1>Travel Guide</h1>
+    <p>Curated destinations for the round-the-world trip. Updated as plans evolve.</p>
+  </div>
+
+  <div class="dest-grid" id="dest-grid">
+    <!-- Populated by JS from the DESTINATIONS array below -->
+  </div>
+
+</div>
+
+<script>
+/**
+ * Add your destinations here.
+ * Each entry maps to:
+ *   destinations/{id}.html   ← the page
+ *   data/{id}.json           ← the content
+ *   img/{id}.jpg             ← the hero image (optional)
+ */
+const DESTINATIONS = [
+  {
+    id:      'patagonia',
+    title:   'Patagonia',
+    tagline: 'Wild glaciers, jagged peaks, and vast open silence.',
+    emoji:   '🏔',
+    tags:    ['🗓 Jan–Feb', '⏱ 10–14 days', '💰 $$$', '🌿 Nature'],
+  },
+  {
+    id:      'athens',
+    title:   'Athens',
+    tagline: 'Ancient marble and modern chaos in equal measure.',
+    emoji:   '🏛',
+    tags:    ['🗓 Apr–Jun', '⏱ 5–7 days', '💰 $$', '🏛 History'],
+  },
+  // ── Add more destinations below ──────────────────────────────
+  // {
+  //   id:      'singapore',
+  //   title:   'Singapore',
+  //   tagline: 'Gleaming skyline, hawker centres, and perfect transit hub.',
+  //   emoji:   '🌆',
+  //   tags:    ['🗓 Year-round', '⏱ 3–5 days', '💰 $$$', '🌆 City'],
+  // },
+];
+
+// Render cards
+const grid = document.getElementById('dest-grid');
+
+DESTINATIONS.forEach(d => {
+  const card = document.createElement('a');
+  card.className = 'dest-card';
+  card.href = `destinations/${d.id}.html`;
+
+  // Image / emoji fallback
+  const imgWrap = document.createElement('div');
+  imgWrap.className = 'dest-card-img';
+  const img = document.createElement('img');
+  img.src = `img/${d.id}.jpg`;
+  img.alt = d.title;
+  img.onerror = () => {
+    imgWrap.innerHTML = '';
+    imgWrap.textContent = d.emoji || '🗺';
+  };
+  imgWrap.append(img);
+
+  const body = document.createElement('div');
+  body.className = 'dest-card-body';
+
+  const h2 = document.createElement('h2');
+  h2.textContent = d.title;
+
+  const p = document.createElement('p');
+  p.textContent = d.tagline;
+
+  const tags = document.createElement('div');
+  tags.className = 'dest-card-tags';
+  d.tags.forEach(t => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.textContent = t;
+    tags.append(span);
+  });
+
+  body.append(h2, p, tags);
+  card.append(imgWrap, body);
+  grid.append(card);
+});
+</script>
+
+</body>
+</html>

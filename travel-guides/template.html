@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Loading… | Travel Guide</title>
+  <link rel="stylesheet" href="../guides.css">
+</head>
+<body>
+
+<div class="page">
+
+  <nav class="site-nav">
+    <a href="../index.html">✦ Travel Guide</a>
+    <span class="sep">›</span>
+    <span id="nav-title">Loading…</span>
+  </nav>
+
+  <div id="app">
+    <!-- Content rendered by JS below -->
+    <div class="error-state" id="loading-state">
+      <div class="shimmer" style="width:200px;margin:0 auto 12px;height:20px;border-radius:8px;"></div>
+      <div class="shimmer" style="width:340px;margin:0 auto 6px;height:12px;border-radius:6px;"></div>
+      <div class="shimmer" style="width:260px;margin:0 auto;height:12px;border-radius:6px;"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function el(tag, attrs = {}, ...children) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'html') e.innerHTML = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const c of children.flat()) {
+    if (typeof c === 'string') e.append(document.createTextNode(c));
+    else if (c) e.append(c);
+  }
+  return e;
+}
+
+function shimmerEl(w = '100%', h = '14px') {
+  return el('div', { class: 'shimmer', style: `width:${w};height:${h};border-radius:6px;` });
+}
+
+// ─── Get destination from URL ────────────────────────────────────────────────
+
+function getDestId() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('dest')) return params.get('dest');
+  // Fall back to filename: destinations/patagonia.html → patagonia
+  const path = location.pathname;
+  const match = path.match(/\/([^/]+)\.html$/);
+  return match ? match[1] : null;
+}
+
+// ─── Safety levels ───────────────────────────────────────────────────────────
+
+const SAFETY_CLASSES = { 1: 'safe', 2: 'caution', 3: 'warn', 4: 'danger' };
+const SAFETY_ICONS   = { 1: '✓', 2: '!', 3: '⚠', 4: '⛔' };
+
+// ─── Render destination ──────────────────────────────────────────────────────
+
+function render(d) {
+  const app = document.getElementById('app');
+  document.getElementById('page-title').textContent = `${d.title} | Travel Guide`;
+  document.getElementById('nav-title').textContent = d.title;
+
+  const seasonColors = { good: 'good', ok: 'ok', bad: 'bad' };
+
+  app.innerHTML = '';
+  app.append(
+
+    // Hero
+    (() => {
+      const hero = el('div', { class: 'hero' });
+      if (d.hero_image) {
+        const img = el('img', { src: d.hero_image, alt: d.title });
+        img.onerror = () => {
+          hero.innerHTML = '';
+          hero.append(el('div', { class: 'hero-placeholder' }, '🗺'));
+        };
+        hero.append(img);
+      } else {
+        hero.append(el('div', { class: 'hero-placeholder' }, '🗺'));
+      }
+      return hero;
+    })(),
+
+    // Title
+    el('h1', { class: 'dest-title' }, d.title),
+    el('p',  { class: 'dest-tagline' }, d.tagline),
+
+    // Snapshot tags
+    el('div', { class: 'snapshot' }, ...[
+      `🗓 Best Time: ${d.snapshot.best_time}`,
+      `⏱ ${d.snapshot.duration}`,
+      `💰 ${d.snapshot.cost}`,
+      `🌿 ${d.snapshot.type}`,
+      `⚡ ${d.snapshot.intensity}`,
+    ].map(t => el('div', { class: 'tag' }, t))),
+
+    // Quick facts
+    el('div', { class: 'quick-facts' }, ...[
+      `🌍 ${d.quick_facts.timezone}`,
+      `🛂 ${d.quick_facts.visa}`,
+      `🗣 ${d.quick_facts.language}`,
+      `💳 ${d.quick_facts.payments}`,
+    ].map(t => el('div', {}, t))),
+
+    // Two-column grid
+    el('div', { class: 'grid' },
+
+      // LEFT — main content
+      el('div', {},
+
+        section('Why Go', ul(d.why_go)),
+        section('Essential Experiences', ul(d.essential_experiences)),
+
+        // Seasonality
+        (() => {
+          const months = el('div', { class: 'months' },
+            ...Object.entries(d.seasonality).map(([m, s]) =>
+              el('span', { class: seasonColors[s] || 'ok' }, m)
+            )
+          );
+          const note = el('p', { class: 'season-note' }, d.seasonality_note);
+          return section('When to Go', months, note);
+        })(),
+
+        section('Food & Drink', ul(d.food_and_drink)),
+        section('Logistics', ul(d.logistics)),
+        section('Friction Factors', ul(d.friction_factors)),
+        section('Tips & Watchouts', ul(d.tips)),
+
+        // Itinerary
+        (() => {
+          const list = el('ul', { class: 'itinerary-list' },
+            ...d.itinerary.map(item =>
+              el('li', {},
+                el('span', { class: 'day-num' }, `Day ${item.day}`),
+                el('span', {}, item.label)
+              )
+            )
+          );
+          return section('Itinerary Ideas', list);
+        })(),
+      ),
+
+      // RIGHT — sidebar
+      el('div', { class: 'sidebar' },
+        safetyPanel(d),
+        waterPanel(d.water_safety),
+        weatherPanel(d),
+        ratePanel(d),
+      )
+    ),
+
+    // Verdict
+    el('div', { class: 'verdict' },
+      el('strong', {}, 'Verdict'),
+      el('p', {}, d.verdict),
+    )
+  );
+
+  // Kick off async panels after render
+  loadSafety(d);
+  loadWeather(d);
+  loadRate(d);
+}
+
+// ─── Section builder ─────────────────────────────────────────────────────────
+
+function section(title, ...children) {
+  return el('div', { class: 'section' },
+    el('h2', {}, title),
+    ...children
+  );
+}
+
+function ul(items) {
+  return el('ul', { class: 'list' }, ...items.map(i => el('li', {}, i)));
+}
+
+// ─── Static panels ───────────────────────────────────────────────────────────
+
+function safetyPanel(d) {
+  const p = el('div', { class: 'panel caution', id: 'safety-panel' });
+  p.append(
+    el('h3', {}, 'Safety advice'),
+    shimmerEl('70%'),
+    shimmerEl('100%', '11px'),
+    shimmerEl('80%',  '11px'),
+  );
+  return p;
+}
+
+function waterPanel(w) {
+  const statusClass = { safe: 'safe', caution: 'caution', unsafe: 'danger' }[w.status] || 'caution';
+  const icon = { safe: '💧', caution: '⚠️', unsafe: '🚱' }[w.status] || '💧';
+  return el('div', { class: `panel ${statusClass}` },
+    el('h3', {}, 'Water safety'),
+    el('div', { class: 'badge' }, `${icon} ${w.label}`),
+    el('p', {}, w.note),
+  );
+}
+
+function weatherPanel(d) {
+  const p = el('div', { class: 'panel', id: 'weather-panel' });
+  p.append(
+    el('h3', {}, 'Climate (avg monthly)'),
+    el('p', {}, 'Loading weather data…'),
+  );
+  return p;
+}
+
+function ratePanel(d) {
+  const p = el('div', { class: 'panel', id: 'rate-panel' });
+  p.append(
+    el('h3', {}, `Exchange rate (AUD → ${d.currency.code})`),
+    el('p', {}, 'Loading rate…'),
+  );
+  return p;
+}
+
+// ─── Live: Safety (Smartraveller via proxy) ──────────────────────────────────
+
+async function loadSafety(d) {
+  const panel = document.getElementById('safety-panel');
+  if (!panel) return;
+
+  // Try the cached JSON first (written nightly by GitHub Action)
+  // Falls back to live proxy fetch
+  try {
+    let country;
+
+    // 1. Try cached data (GitHub Action output)
+    try {
+      const cached = await fetch('../data/safety-cache.json');
+      if (cached.ok) {
+        const cache = await cached.json();
+        country = cache[d.smartraveller_country];
+      }
+    } catch (_) {}
+
+    // 2. Fall back to live Smartraveller via CORS proxy
+    if (!country) {
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.smartraveller.gov.au/destinations-export')}`;
+      const res  = await fetch(proxyUrl);
+      const data = await res.json();
+      const list = JSON.parse(data.contents);
+      country = list.find(c => c.name === d.smartraveller_country);
+    }
+
+    if (country) {
+      const level = country.advice_level;
+      const cls   = SAFETY_CLASSES[level] || 'caution';
+      panel.className = `panel ${cls}`;
+      panel.innerHTML = '';
+      panel.append(
+        el('h3', {}, 'Safety advice'),
+        el('div', { class: 'badge' }, `${SAFETY_ICONS[level]} Level ${level}: ${country.advice_text}`),
+        el('p', {}, `Updated: ${country.last_updated}`),
+        el('a', { href: country.url, target: '_blank', rel: 'noopener' }, 'Full Smartraveller advice →'),
+      );
+    } else {
+      setSafetyFallback(panel, d);
+    }
+  } catch (e) {
+    setSafetyFallback(panel, d);
+  }
+}
+
+function setSafetyFallback(panel, d) {
+  panel.className = 'panel caution';
+  panel.innerHTML = '';
+  panel.append(
+    el('h3', {}, 'Safety advice'),
+    el('div', { class: 'badge' }, '⚠ Check before travel'),
+    el('a', {
+      href: `https://www.smartraveller.gov.au/destinations/${d.smartraveller_country.toLowerCase().replace(/ /g, '-')}`,
+      target: '_blank', rel: 'noopener'
+    }, 'View Smartraveller advice →'),
+  );
+}
+
+// ─── Live: Weather (Open-Meteo climate normals) ──────────────────────────────
+
+async function loadWeather(d) {
+  const panel = document.getElementById('weather-panel');
+  if (!panel || !d.climate) return;
+
+  try {
+    // Open-Meteo climate API — free, no key, CORS-friendly
+    const url = `https://climate-api.open-meteo.com/v1/climate?` +
+      `latitude=${d.climate.lat}&longitude=${d.climate.lon}` +
+      `&start_date=1991-01-01&end_date=2020-12-31` +
+      `&monthly=temperature_2m_max,temperature_2m_min,precipitation_sum` +
+      `&models=EC_Earth3P_HR`;
+
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if (!data.monthly) throw new Error('No data');
+
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const hi     = data.monthly.temperature_2m_max;
+    const lo     = data.monthly.temperature_2m_min;
+    const rain   = data.monthly.precipitation_sum;
+
+    // Show 4 representative months per row
+    const keyMonths = [0, 3, 6, 9]; // Jan, Apr, Jul, Oct
+
+    panel.innerHTML = '';
+    panel.append(el('h3', {}, 'Climate (monthly avg)'));
+
+    const grid = el('div', { class: 'weather-grid' });
+    for (const i of keyMonths) {
+      grid.append(
+        el('div', { class: 'weather-month' },
+          el('div', { class: 'wm-name' }, months[i]),
+          el('div', { class: 'wm-hi' },   `${Math.round(hi[i])}°`),
+          el('div', { class: 'wm-lo' },   `${Math.round(lo[i])}° lo`),
+          el('div', { class: 'wm-rain' }, `${Math.round(rain[i])}mm`),
+        )
+      );
+    }
+    panel.append(grid);
+    panel.append(el('p', { style: 'margin-top:8px;' }, '30-year climate averages. Hi / lo / rainfall.'));
+
+  } catch (e) {
+    const panel2 = document.getElementById('weather-panel');
+    if (panel2) {
+      panel2.innerHTML = '';
+      panel2.append(
+        el('h3', {}, 'Climate'),
+        el('p', {}, 'Weather data unavailable.'),
+      );
+    }
+  }
+}
+
+// ─── Live: Exchange rate (exchangerate.host — free, no key) ─────────────────
+
+async function loadRate(d) {
+  const panel = document.getElementById('rate-panel');
+  if (!panel) return;
+
+  const code = d.currency.code;
+  if (code === 'AUD') {
+    panel.innerHTML = '';
+    panel.append(el('h3', {}, 'Currency'), el('p', {}, 'Local currency is AUD.'));
+    return;
+  }
+
+  try {
+    // Frankfurter is free, no key, CORS-safe
+    const res  = await fetch(`https://api.frankfurter.app/latest?from=AUD&to=${code}`);
+    const data = await res.json();
+    const rate = data.rates[code];
+
+    if (!rate) throw new Error('Rate missing');
+
+    panel.innerHTML = '';
+    panel.append(
+      el('h3', {}, `Exchange rate`),
+      el('div', { class: 'rate-display' }, `1 AUD = ${rate.toFixed(2)} ${code}`),
+      el('div', { class: 'rate-sub' }, `${d.currency.label} · Live rate`),
+      el('p', { style: 'margin-top:6px;' }, `100 AUD = ${(rate * 100).toFixed(0)} ${code}`),
+    );
+  } catch (e) {
+    panel.innerHTML = '';
+    panel.append(
+      el('h3', {}, `Exchange rate`),
+      el('p', {}, `Could not load ${code} rate.`),
+      el('a', { href: `https://www.xe.com/currencyconverter/convert/?Amount=100&From=AUD&To=${code}`, target: '_blank' }, `Check on XE.com →`),
+    );
+  }
+}
+
+// ─── Boot ────────────────────────────────────────────────────────────────────
+
+async function boot() {
+  const destId = getDestId();
+  if (!destId) {
+    document.getElementById('app').innerHTML = `
+      <div class="error-state">
+        <h2>No destination specified</h2>
+        <p><a href="../index.html">← Back to all destinations</a></p>
+      </div>`;
+    return;
+  }
+
+  try {
+    const res = await fetch(`../data/${destId}.json`);
+    if (!res.ok) throw new Error(`${res.status}`);
+    const data = await res.json();
+    render(data);
+  } catch (e) {
+    document.getElementById('app').innerHTML = `
+      <div class="error-state">
+        <h2>Destination not found</h2>
+        <p>Could not load <code>${destId}</code>. <a href="../index.html">← All destinations</a></p>
+      </div>`;
+  }
+}
+
+boot();
+</script>
+
+</body>
+</html>
