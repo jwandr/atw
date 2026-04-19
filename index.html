@@ -890,15 +890,38 @@
     document.getElementById("panel-backdrop").addEventListener("click", closePanel);
 
     // ── Climate (Open-Meteo) ─────────────────────────────────────
-    function getWeatherIcon(temp, rain) {
+    function getWeatherIcon(temp, rain, lat = null) {
       if (temp == null) return "—";
 
-      if (rain > 120) return "🌧️";      // very wet
-      if (rain > 60)  return "🌦️";      // some rain
-      if (temp >= 28) return "☀️";      // hot
-      if (temp >= 18) return "🌤️";      // warm
-      if (temp >= 10) return "⛅";      // mild
-      return "❄️";                      // cold
+      const isTropical = lat != null && Math.abs(lat) <= 23.5;
+
+      const hot = temp >= 30;
+      const warm = temp >= 20 && temp < 30;
+      const mild = temp >= 10 && temp < 20;
+      const cold = temp < 10;
+
+      const wet = rain > 80;
+      const veryWet = rain > 150;
+
+      // 🌧️ Tropical logic (rain is less punishing)
+      if (isTropical) {
+        if (hot && wet) return "🌦️";   // tropical showers = normal life
+        if (hot) return "☀️";          // classic tropics
+        if (warm && wet) return "🌤️";  // still fine, just humid
+        if (cold) return "⛅";          // rare but possible highland tropics
+        return "🌴";                   // optional "perfect tropics" vibe
+      }
+
+      // 🌍 Non-tropical logic (rain is more disruptive)
+      if (veryWet) return "🌧️";
+      if (wet && cold) return "🌧️";
+      if (wet) return "🌦️";
+
+      if (hot) return "☀️";
+      if (warm) return "🌤️";
+      if (mild) return "⛅";
+
+      return "❄️";
     }
 
     async function fetchClimate(lat, lon) {
