@@ -1,4 +1,943 @@
 {
-  "_fetched_at": null,
-  "_note": "Updated nightly by sync-cost GitHub Action. Do not edit manually."
+  "_fetched_at": "2026-04-19T03:03:34.244431Z",
+  "_australia_col": 67.9,
+  "_australia_rent": 33.7,
+  "_australia_grocery": 76.5,
+  "_australia_restaurant": 65.6,
+  "countries": {
+    "Bermuda": {
+      "col": 135.8,
+      "rent": 108.2,
+      "grocery": 143.4,
+      "restaurant": 147.5
+    },
+    "Cayman Islands": {
+      "col": 115.6,
+      "rent": 76.1,
+      "grocery": 124.0,
+      "restaurant": 101.5
+    },
+    "Us Virgin Islands": {
+      "col": 111.3,
+      "rent": 46.8,
+      "grocery": 127.4,
+      "restaurant": 94.8
+    },
+    "Switzerland": {
+      "col": 110.7,
+      "rent": 51.5,
+      "grocery": 109.7,
+      "restaurant": 111.3
+    },
+    "Solomon Islands": {
+      "col": 102.3,
+      "rent": 19.5,
+      "grocery": 64.8,
+      "restaurant": 46.0
+    },
+    "Bahamas": {
+      "col": 98.8,
+      "rent": 50.2,
+      "grocery": 100.9,
+      "restaurant": 109.0
+    },
+    "Iceland": {
+      "col": 97.2,
+      "rent": 49.5,
+      "grocery": 104.5,
+      "restaurant": 104.9
+    },
+    "Jersey": {
+      "col": 88.7,
+      "rent": 52.4,
+      "grocery": 79.0,
+      "restaurant": 102.3
+    },
+    "Singapore": {
+      "col": 87.7,
+      "rent": 73.1,
+      "grocery": 77.3,
+      "restaurant": 55.5
+    },
+    "Norway": {
+      "col": 83.7,
+      "rent": 29.2,
+      "grocery": 85.4,
+      "restaurant": 88.6
+    },
+    "Israel": {
+      "col": 79.7,
+      "rent": 31.2,
+      "grocery": 74.0,
+      "restaurant": 89.9
+    },
+    "Denmark": {
+      "col": 78.9,
+      "rent": 28.9,
+      "grocery": 72.7,
+      "restaurant": 93.7
+    },
+    "Luxembourg": {
+      "col": 78.0,
+      "rent": 49.3,
+      "grocery": 77.7,
+      "restaurant": 83.3
+    },
+    "Grenada": {
+      "col": 76.4,
+      "rent": 15.8,
+      "grocery": 68.9,
+      "restaurant": 53.5
+    },
+    "Hong Kong (China)": {
+      "col": 75.2,
+      "rent": 63.1,
+      "grocery": 75.1,
+      "restaurant": 51.1
+    },
+    "Isle Of Man": {
+      "col": 74.7,
+      "rent": 32.0,
+      "grocery": 65.3,
+      "restaurant": 91.8
+    },
+    "Guernsey": {
+      "col": 73.4,
+      "rent": 55.3,
+      "grocery": 77.9,
+      "restaurant": 71.2
+    },
+    "Netherlands": {
+      "col": 73.4,
+      "rent": 38.7,
+      "grocery": 66.9,
+      "restaurant": 81.6
+    },
+    "Austria": {
+      "col": 71.3,
+      "rent": 25.1,
+      "grocery": 72.6,
+      "restaurant": 71.5
+    },
+    "Ireland": {
+      "col": 70.6,
+      "rent": 43.8,
+      "grocery": 68.8,
+      "restaurant": 76.6
+    },
+    "Gibraltar": {
+      "col": 70.3,
+      "rent": 56.0,
+      "grocery": 60.8,
+      "restaurant": 78.7
+    },
+    "Finland": {
+      "col": 69.0,
+      "rent": 21.9,
+      "grocery": 68.7,
+      "restaurant": 74.1
+    },
+    "United States": {
+      "col": 68.8,
+      "rent": 40.7,
+      "grocery": 74.0,
+      "restaurant": 72.8
+    },
+    "Germany": {
+      "col": 68.7,
+      "rent": 24.6,
+      "grocery": 64.9,
+      "restaurant": 66.9
+    },
+    "Belgium": {
+      "col": 68.6,
+      "rent": 23.8,
+      "grocery": 66.4,
+      "restaurant": 80.7
+    },
+    "Sweden": {
+      "col": 68.0,
+      "rent": 22.6,
+      "grocery": 68.4,
+      "restaurant": 70.8
+    },
+    "Australia": {
+      "col": 67.9,
+      "rent": 33.7,
+      "grocery": 76.5,
+      "restaurant": 65.6
+    },
+    "United Kingdom": {
+      "col": 67.8,
+      "rent": 32.1,
+      "grocery": 62.8,
+      "restaurant": 72.9
+    },
+    "France": {
+      "col": 67.7,
+      "rent": 22.3,
+      "grocery": 73.2,
+      "restaurant": 66.2
+    },
+    "Seychelles": {
+      "col": 64.5,
+      "rent": 27.6,
+      "grocery": 74.8,
+      "restaurant": 66.2
+    },
+    "Canada": {
+      "col": 63.0,
+      "rent": 31.5,
+      "grocery": 69.6,
+      "restaurant": 64.1
+    },
+    "Puerto Rico": {
+      "col": 62.6,
+      "rent": 21.7,
+      "grocery": 67.3,
+      "restaurant": 56.4
+    },
+    "South Korea": {
+      "col": 61.6,
+      "rent": 16.1,
+      "grocery": 77.5,
+      "restaurant": 35.8
+    },
+    "Italy": {
+      "col": 61.4,
+      "rent": 20.5,
+      "grocery": 62.7,
+      "restaurant": 64.7
+    },
+    "Macao (China)": {
+      "col": 60.5,
+      "rent": 28.5,
+      "grocery": 67.5,
+      "restaurant": 44.3
+    },
+    "New Zealand": {
+      "col": 60.3,
+      "rent": 26.2,
+      "grocery": 65.4,
+      "restaurant": 59.3
+    },
+    "Estonia": {
+      "col": 59.7,
+      "rent": 16.7,
+      "grocery": 54.1,
+      "restaurant": 64.9
+    },
+    "Cyprus": {
+      "col": 58.8,
+      "rent": 26.9,
+      "grocery": 54.5,
+      "restaurant": 60.9
+    },
+    "Malta": {
+      "col": 56.8,
+      "rent": 28.2,
+      "grocery": 55.9,
+      "restaurant": 64.1
+    },
+    "Uruguay": {
+      "col": 55.6,
+      "rent": 14.7,
+      "grocery": 55.1,
+      "restaurant": 59.6
+    },
+    "United Arab Emirates": {
+      "col": 55.2,
+      "rent": 39.6,
+      "grocery": 44.4,
+      "restaurant": 56.5
+    },
+    "Andorra": {
+      "col": 55.1,
+      "rent": 32.8,
+      "grocery": 51.4,
+      "restaurant": 56.1
+    },
+    "Jamaica": {
+      "col": 54.5,
+      "rent": 19.2,
+      "grocery": 63.5,
+      "restaurant": 46.8
+    },
+    "Slovenia": {
+      "col": 54.1,
+      "rent": 20.6,
+      "grocery": 52.4,
+      "restaurant": 51.3
+    },
+    "Greece": {
+      "col": 54.0,
+      "rent": 13.7,
+      "grocery": 51.0,
+      "restaurant": 59.2
+    },
+    "Yemen": {
+      "col": 53.1,
+      "rent": 5.9,
+      "grocery": 64.7,
+      "restaurant": 38.2
+    },
+    "Czech Republic": {
+      "col": 53.0,
+      "rent": 20.7,
+      "grocery": 50.5,
+      "restaurant": 43.1
+    },
+    "Costa Rica": {
+      "col": 52.9,
+      "rent": 20.3,
+      "grocery": 59.2,
+      "restaurant": 47.5
+    },
+    "Croatia": {
+      "col": 52.4,
+      "rent": 18.0,
+      "grocery": 48.9,
+      "restaurant": 55.3
+    },
+    "Latvia": {
+      "col": 52.3,
+      "rent": 11.9,
+      "grocery": 47.5,
+      "restaurant": 54.6
+    },
+    "Trinidad And Tobago": {
+      "col": 52.0,
+      "rent": 14.4,
+      "grocery": 55.3,
+      "restaurant": 47.4
+    },
+    "Spain": {
+      "col": 51.6,
+      "rent": 23.2,
+      "grocery": 50.6,
+      "restaurant": 55.1
+    },
+    "Lithuania": {
+      "col": 51.2,
+      "rent": 15.6,
+      "grocery": 46.3,
+      "restaurant": 56.3
+    },
+    "Guyana": {
+      "col": 50.4,
+      "rent": 24.8,
+      "grocery": 62.6,
+      "restaurant": 53.8
+    },
+    "Qatar": {
+      "col": 50.4,
+      "rent": 40.0,
+      "grocery": 41.6,
+      "restaurant": 55.4
+    },
+    "Democratic Republic of the Congo": {
+      "col": 50.2,
+      "rent": 32.8,
+      "grocery": 48.0,
+      "restaurant": 66.1
+    },
+    "Taiwan": {
+      "col": 49.7,
+      "rent": 14.2,
+      "grocery": 64.6,
+      "restaurant": 27.4
+    },
+    "Slovakia": {
+      "col": 49.6,
+      "rent": 17.3,
+      "grocery": 50.0,
+      "restaurant": 43.3
+    },
+    "Maldives": {
+      "col": 48.9,
+      "rent": 24.6,
+      "grocery": 52.7,
+      "restaurant": 42.9
+    },
+    "Portugal": {
+      "col": 48.8,
+      "rent": 25.2,
+      "grocery": 46.9,
+      "restaurant": 45.6
+    },
+    "Senegal": {
+      "col": 48.5,
+      "rent": 19.3,
+      "grocery": 45.0,
+      "restaurant": 42.9
+    },
+    "Brunei": {
+      "col": 48.2,
+      "rent": 15.5,
+      "grocery": 66.1,
+      "restaurant": 33.3
+    },
+    "Palestine": {
+      "col": 48.1,
+      "rent": 9.6,
+      "grocery": 49.8,
+      "restaurant": 38.8
+    },
+    "Bahrain": {
+      "col": 47.6,
+      "rent": 21.4,
+      "grocery": 45.2,
+      "restaurant": 47.0
+    },
+    "Papua New Guinea": {
+      "col": 47.5,
+      "rent": 29.0,
+      "grocery": 54.1,
+      "restaurant": 34.9
+    },
+    "Japan": {
+      "col": 47.5,
+      "rent": 14.7,
+      "grocery": 56.8,
+      "restaurant": 30.3
+    },
+    "Poland": {
+      "col": 47.3,
+      "rent": 18.4,
+      "grocery": 41.1,
+      "restaurant": 48.1
+    },
+    "Hungary": {
+      "col": 46.9,
+      "rent": 14.1,
+      "grocery": 45.4,
+      "restaurant": 44.7
+    },
+    "Belize": {
+      "col": 46.9,
+      "rent": 13.6,
+      "grocery": 52.6,
+      "restaurant": 39.3
+    },
+    "Cape Verde": {
+      "col": 46.3,
+      "rent": 8.8,
+      "grocery": 57.2,
+      "restaurant": 35.6
+    },
+    "Albania": {
+      "col": 45.8,
+      "rent": 14.1,
+      "grocery": 46.2,
+      "restaurant": 43.5
+    },
+    "Panama": {
+      "col": 45.5,
+      "rent": 23.2,
+      "grocery": 51.3,
+      "restaurant": 42.9
+    },
+    "Ivory Coast": {
+      "col": 44.8,
+      "rent": 21.8,
+      "grocery": 41.3,
+      "restaurant": 39.1
+    },
+    "Saudi Arabia": {
+      "col": 43.9,
+      "rent": 13.5,
+      "grocery": 41.2,
+      "restaurant": 34.5
+    },
+    "Oman": {
+      "col": 43.6,
+      "rent": 13.2,
+      "grocery": 42.4,
+      "restaurant": 41.8
+    },
+    "Montenegro": {
+      "col": 42.7,
+      "rent": 16.6,
+      "grocery": 40.5,
+      "restaurant": 44.8
+    },
+    "Serbia": {
+      "col": 42.6,
+      "rent": 13.1,
+      "grocery": 39.1,
+      "restaurant": 42.2
+    },
+    "Mexico": {
+      "col": 42.6,
+      "rent": 17.8,
+      "grocery": 46.6,
+      "restaurant": 43.6
+    },
+    "Kuwait": {
+      "col": 42.5,
+      "rent": 22.0,
+      "grocery": 35.8,
+      "restaurant": 43.4
+    },
+    "Angola": {
+      "col": 42.3,
+      "rent": 24.8,
+      "grocery": 39.2,
+      "restaurant": 35.0
+    },
+    "Suriname": {
+      "col": 42.3,
+      "rent": 10.7,
+      "grocery": 51.5,
+      "restaurant": 39.9
+    },
+    "Cuba": {
+      "col": 41.8,
+      "rent": 11.4,
+      "grocery": 41.2,
+      "restaurant": 26.3
+    },
+    "Ethiopia": {
+      "col": 41.8,
+      "rent": 18.3,
+      "grocery": 44.5,
+      "restaurant": 22.9
+    },
+    "Lebanon": {
+      "col": 41.7,
+      "rent": 14.3,
+      "grocery": 34.4,
+      "restaurant": 44.2
+    },
+    "Bulgaria": {
+      "col": 41.6,
+      "rent": 11.1,
+      "grocery": 42.6,
+      "restaurant": 42.6
+    },
+    "Argentina": {
+      "col": 41.3,
+      "rent": 12.1,
+      "grocery": 41.1,
+      "restaurant": 47.9
+    },
+    "Armenia": {
+      "col": 40.9,
+      "rent": 15.2,
+      "grocery": 36.1,
+      "restaurant": 40.3
+    },
+    "Cameroon": {
+      "col": 40.7,
+      "rent": 19.1,
+      "grocery": 37.8,
+      "restaurant": 45.5
+    },
+    "Romania": {
+      "col": 40.6,
+      "rent": 12.0,
+      "grocery": 39.0,
+      "restaurant": 43.5
+    },
+    "Guatemala": {
+      "col": 40.4,
+      "rent": 16.0,
+      "grocery": 45.1,
+      "restaurant": 38.8
+    },
+    "El Salvador": {
+      "col": 39.6,
+      "rent": 16.6,
+      "grocery": 42.5,
+      "restaurant": 34.4
+    },
+    "Jordan": {
+      "col": 39.4,
+      "rent": 7.9,
+      "grocery": 36.3,
+      "restaurant": 40.7
+    },
+    "Turkey": {
+      "col": 39.2,
+      "rent": 13.3,
+      "grocery": 39.1,
+      "restaurant": 37.1
+    },
+    "Chile": {
+      "col": 39.0,
+      "rent": 11.6,
+      "grocery": 42.1,
+      "restaurant": 39.7
+    },
+    "Bosnia And Herzegovina": {
+      "col": 38.7,
+      "rent": 8.1,
+      "grocery": 39.0,
+      "restaurant": 32.1
+    },
+    "Mauritius": {
+      "col": 38.3,
+      "rent": 10.9,
+      "grocery": 41.1,
+      "restaurant": 32.5
+    },
+    "Dominican Republic": {
+      "col": 38.2,
+      "rent": 14.0,
+      "grocery": 38.9,
+      "restaurant": 35.9
+    },
+    "Thailand": {
+      "col": 38.0,
+      "rent": 13.9,
+      "grocery": 44.4,
+      "restaurant": 25.0
+    },
+    "Myanmar": {
+      "col": 38.0,
+      "rent": 11.1,
+      "grocery": 38.2,
+      "restaurant": 16.3
+    },
+    "Venezuela": {
+      "col": 37.7,
+      "rent": 7.1,
+      "grocery": 42.2,
+      "restaurant": 40.7
+    },
+    "South Africa": {
+      "col": 37.1,
+      "rent": 13.0,
+      "grocery": 32.6,
+      "restaurant": 35.6
+    },
+    "Mozambique": {
+      "col": 36.9,
+      "rent": 12.2,
+      "grocery": 34.1,
+      "restaurant": 35.1
+    },
+    "Honduras": {
+      "col": 36.6,
+      "rent": 12.1,
+      "grocery": 39.8,
+      "restaurant": 34.1
+    },
+    "Russia": {
+      "col": 36.5,
+      "rent": 12.3,
+      "grocery": 35.7,
+      "restaurant": 35.4
+    },
+    "Namibia": {
+      "col": 36.3,
+      "rent": 14.2,
+      "grocery": 37.8,
+      "restaurant": 29.6
+    },
+    "Zimbabwe": {
+      "col": 35.9,
+      "rent": 9.6,
+      "grocery": 35.0,
+      "restaurant": 33.8
+    },
+    "Moldova": {
+      "col": 35.8,
+      "rent": 14.7,
+      "grocery": 33.6,
+      "restaurant": 32.5
+    },
+    "North Macedonia": {
+      "col": 35.5,
+      "rent": 7.9,
+      "grocery": 34.9,
+      "restaurant": 29.1
+    },
+    "Cambodia": {
+      "col": 34.8,
+      "rent": 10.0,
+      "grocery": 41.6,
+      "restaurant": 25.4
+    },
+    "Fiji": {
+      "col": 34.3,
+      "rent": 17.2,
+      "grocery": 43.3,
+      "restaurant": 32.5
+    },
+    "Nicaragua": {
+      "col": 34.2,
+      "rent": 7.9,
+      "grocery": 41.6,
+      "restaurant": 26.0
+    },
+    "Malaysia": {
+      "col": 34.0,
+      "rent": 9.2,
+      "grocery": 42.0,
+      "restaurant": 25.2
+    },
+    "Ghana": {
+      "col": 33.9,
+      "rent": 10.9,
+      "grocery": 37.0,
+      "restaurant": 35.2
+    },
+    "Sri Lanka": {
+      "col": 33.9,
+      "rent": 7.2,
+      "grocery": 48.1,
+      "restaurant": 24.3
+    },
+    "Peru": {
+      "col": 33.5,
+      "rent": 11.3,
+      "grocery": 37.7,
+      "restaurant": 28.3
+    },
+    "Georgia": {
+      "col": 33.1,
+      "rent": 12.7,
+      "grocery": 32.3,
+      "restaurant": 36.2
+    },
+    "Botswana": {
+      "col": 32.6,
+      "rent": 6.6,
+      "grocery": 31.7,
+      "restaurant": 30.2
+    },
+    "Colombia": {
+      "col": 31.7,
+      "rent": 10.9,
+      "grocery": 32.8,
+      "restaurant": 27.0
+    },
+    "Morocco": {
+      "col": 31.4,
+      "rent": 8.3,
+      "grocery": 33.0,
+      "restaurant": 25.0
+    },
+    "Mongolia": {
+      "col": 31.4,
+      "rent": 17.3,
+      "grocery": 35.5,
+      "restaurant": 24.7
+    },
+    "Ecuador": {
+      "col": 30.9,
+      "rent": 8.7,
+      "grocery": 33.8,
+      "restaurant": 27.0
+    },
+    "Azerbaijan": {
+      "col": 30.7,
+      "rent": 9.7,
+      "grocery": 29.2,
+      "restaurant": 35.3
+    },
+    "Belarus": {
+      "col": 30.5,
+      "rent": 10.3,
+      "grocery": 30.8,
+      "restaurant": 33.3
+    },
+    "China": {
+      "col": 30.5,
+      "rent": 10.4,
+      "grocery": 34.7,
+      "restaurant": 21.0
+    },
+    "Brazil": {
+      "col": 30.1,
+      "rent": 8.5,
+      "grocery": 30.0,
+      "restaurant": 26.0
+    },
+    "Philippines": {
+      "col": 30.1,
+      "rent": 7.8,
+      "grocery": 35.4,
+      "restaurant": 19.7
+    },
+    "Zambia": {
+      "col": 29.9,
+      "rent": 12.2,
+      "grocery": 30.7,
+      "restaurant": 23.1
+    },
+    "Kazakhstan": {
+      "col": 29.8,
+      "rent": 10.9,
+      "grocery": 30.0,
+      "restaurant": 31.2
+    },
+    "Kosovo (Disputed Territory)": {
+      "col": 29.1,
+      "rent": 7.6,
+      "grocery": 30.8,
+      "restaurant": 24.2
+    },
+    "Tunisia": {
+      "col": 29.1,
+      "rent": 5.3,
+      "grocery": 34.9,
+      "restaurant": 17.9
+    },
+    "Kenya": {
+      "col": 28.9,
+      "rent": 7.8,
+      "grocery": 30.4,
+      "restaurant": 25.9
+    },
+    "Paraguay": {
+      "col": 28.5,
+      "rent": 10.2,
+      "grocery": 27.9,
+      "restaurant": 26.4
+    },
+    "Iraq": {
+      "col": 28.4,
+      "rent": 7.3,
+      "grocery": 28.1,
+      "restaurant": 25.5
+    },
+    "Ukraine": {
+      "col": 28.2,
+      "rent": 8.2,
+      "grocery": 28.8,
+      "restaurant": 25.4
+    },
+    "Algeria": {
+      "col": 28.0,
+      "rent": 3.5,
+      "grocery": 37.2,
+      "restaurant": 16.5
+    },
+    "Tajikistan": {
+      "col": 27.9,
+      "rent": 9.7,
+      "grocery": 35.2,
+      "restaurant": 20.0
+    },
+    "Nigeria": {
+      "col": 27.7,
+      "rent": 22.8,
+      "grocery": 31.4,
+      "restaurant": 21.0
+    },
+    "Uzbekistan": {
+      "col": 27.3,
+      "rent": 12.2,
+      "grocery": 30.1,
+      "restaurant": 23.0
+    },
+    "Bolivia": {
+      "col": 27.3,
+      "rent": 8.6,
+      "grocery": 28.4,
+      "restaurant": 22.2
+    },
+    "Kyrgyzstan": {
+      "col": 27.3,
+      "rent": 12.0,
+      "grocery": 27.6,
+      "restaurant": 23.6
+    },
+    "Uganda": {
+      "col": 27.0,
+      "rent": 10.5,
+      "grocery": 29.1,
+      "restaurant": 25.1
+    },
+    "Tanzania": {
+      "col": 26.6,
+      "rent": 9.0,
+      "grocery": 26.6,
+      "restaurant": 21.3
+    },
+    "Vietnam": {
+      "col": 26.4,
+      "rent": 9.9,
+      "grocery": 31.8,
+      "restaurant": 15.6
+    },
+    "Indonesia": {
+      "col": 26.1,
+      "rent": 9.1,
+      "grocery": 33.6,
+      "restaurant": 15.3
+    },
+    "Syria": {
+      "col": 25.0,
+      "rent": 5.1,
+      "grocery": 27.1,
+      "restaurant": 20.1
+    },
+    "Rwanda": {
+      "col": 25.0,
+      "rent": 12.4,
+      "grocery": 23.5,
+      "restaurant": 21.9
+    },
+    "Iran": {
+      "col": 22.8,
+      "rent": 8.0,
+      "grocery": 20.7,
+      "restaurant": 16.2
+    },
+    "Bangladesh": {
+      "col": 22.8,
+      "rent": 2.6,
+      "grocery": 26.8,
+      "restaurant": 17.5
+    },
+    "Nepal": {
+      "col": 22.6,
+      "rent": 2.9,
+      "grocery": 23.2,
+      "restaurant": 17.4
+    },
+    "Madagascar": {
+      "col": 22.5,
+      "rent": 7.4,
+      "grocery": 23.8,
+      "restaurant": 15.4
+    },
+    "Egypt": {
+      "col": 21.6,
+      "rent": 4.0,
+      "grocery": 22.2,
+      "restaurant": 20.1
+    },
+    "Afghanistan": {
+      "col": 21.1,
+      "rent": 2.3,
+      "grocery": 18.2,
+      "restaurant": 15.1
+    },
+    "Pakistan": {
+      "col": 19.6,
+      "rent": 3.4,
+      "grocery": 18.2,
+      "restaurant": 17.2
+    },
+    "India": {
+      "col": 18.9,
+      "rent": 4.3,
+      "grocery": 21.6,
+      "restaurant": 15.6
+    },
+    "Libya": {
+      "col": 18.3,
+      "rent": 4.9,
+      "grocery": 22.8,
+      "restaurant": 12.4
+    }
+  },
+  "city_prices": {
+    "patagonia": {},
+    "athens": {}
+  }
 }
