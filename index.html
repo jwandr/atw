@@ -100,6 +100,30 @@
       line-height: 1.5;
     }
 
+    /* Best time to go */
+    .besttime-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .besttime-cell {
+      height: 20px;
+      border-radius: 4px;
+    }
+
+    .best { background: #2ecc71; }
+    .shoulder { background: #f39c12; }
+    .worst { background: #e74c3c; }
+
+    #besttime-text {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #555;
+      line-height: 1.4;
+    }
+
     /* WEATHER */
     .weather-grid {
       display: grid;
@@ -213,6 +237,11 @@
       <button id="panel-close">✕</button>
     </div>
     <div id="panel-body">
+      <div class="info-card" id="card-besttime">
+        <div class="info-card-label">When to go</div>
+        <div id="besttime-grid"></div>
+        <div id="besttime-text"></div>
+      </div>
       <div class="info-card" id="card-climate">
         <div class="info-card-label">Climate</div>
         <div class="shimmer" style="width:60%;margin-bottom:6px"></div>
@@ -394,6 +423,275 @@
       "Maldives":         { lat:  3.2,  lon:  73.2, water:"safe",    waterNote:"Resorts provide safe desalinated water.",   country:"Maldives" }
     };
 
+    // Best Time to Visit Info
+    const BEST_TIME_TO_VISIT = {
+      "United States of America": {
+        months: ["Apr","May","Sep","Oct"],
+        bestReason: "Mild temperatures across most regions; spring bloom and autumn foliage; lower humidity and fewer extreme weather events.",
+        worstMonths: ["Jan","Feb","Jul","Aug","Dec"],
+        worstReason: "Winter cold in northern states; peak summer heat and humidity; hurricane risk in some coastal regions."
+      },
+
+      "Canada": {
+        months: ["Jun","Jul","Aug","Sep"],
+        bestReason: "Warm weather, long daylight hours, and full access to national parks and outdoor travel routes.",
+        worstMonths: ["Nov","Dec","Jan","Feb","Mar","Apr"],
+        worstReason: "Severe winter conditions across most regions; limited accessibility and extreme cold."
+      },
+
+      "Denmark": {
+        months: ["May","Jun","Jul","Aug","Sep"],
+        bestReason: "Mild Nordic summer with long daylight hours and ideal cycling and coastal conditions.",
+        worstMonths: ["Nov","Dec","Jan","Feb","Mar"],
+        worstReason: "Cold, wet, and dark winter months reduce outdoor travel comfort."
+      },
+
+      "Hungary": {
+        months: ["May","Jun","Sep"],
+        bestReason: "Warm but comfortable temperatures ideal for Budapest and Danube activities.",
+        worstMonths: ["Nov","Dec","Jan","Feb","Mar"],
+        worstReason: "Cold winters and grey shoulder seasons reduce outdoor enjoyment."
+      },
+
+      "Belize": {
+        months: ["Dec","Jan","Feb","Mar","Apr"],
+        bestReason: "Dry season with calm seas and ideal diving conditions.",
+        worstMonths: ["Jun","Jul","Aug","Sep","Oct"],
+        worstReason: "Hurricane and rainy season reduces visibility and travel reliability."
+      },
+
+      "Honduras": {
+        months: ["Feb","Mar","Apr"],
+        bestReason: "Dry season with stable weather and good coastal conditions.",
+        worstMonths: ["May","Jun","Jul","Aug","Sep","Oct"],
+        worstReason: "Heavy rainfall and storm risk disrupt travel."
+      },
+
+      "Costa Rica": {
+        months: ["Dec","Jan","Feb","Mar","Apr"],
+        bestReason: "Dry season ideal for wildlife, beaches, and rainforest access.",
+        worstMonths: ["Jun","Jul","Aug","Sep","Oct"],
+        worstReason: "Heavy rainfall and muddy conditions reduce accessibility."
+      },
+
+      "Netherlands": {
+        months: ["May","Jun","Jul","Aug","Sep"],
+        bestReason: "Mild summer with long days ideal for cycling and canal cities.",
+        worstMonths: ["Nov","Dec","Jan","Feb","Mar"],
+        worstReason: "Cold, wet winters with limited daylight."
+      },
+
+      "France": {
+        months: ["May","Jun","Sep"],
+        bestReason: "Balanced weather with fewer crowds across cities, coast, and countryside.",
+        worstMonths: ["Nov","Dec","Jan","Feb","Mar"],
+        worstReason: "Winter cold and reduced daylight across most regions."
+      },
+
+      "Brazil": {
+        months: ["May","Jun","Jul","Aug","Sep"],
+        bestReason: "Dryer season with better access to Amazon and coastal regions.",
+        worstMonths: ["Dec","Jan","Feb","Mar"],
+        worstReason: "Wet season brings heavy rainfall and high humidity."
+      },
+
+      "Poland": {
+        months: ["May","Jun","Jul","Aug","Sep"],
+        bestReason: "Warm summers ideal for cities, mountains, and historical sites.",
+        worstMonths: ["Nov","Dec","Jan","Feb","Mar"],
+        worstReason: "Cold winters and short daylight hours."
+      },
+
+      "Latvia": {
+        months: ["Jun","Jul","Aug"],
+        bestReason: "Short warm summer with long daylight hours.",
+        worstMonths: ["Oct","Nov","Dec","Jan","Feb","Mar","Apr"],
+        worstReason: "Long cold seasons dominate the year."
+      },
+
+      "Finland": {
+        months: ["Jun","Jul","Aug"],
+        bestReason: "Midnight sun and warmest conditions for lakes and wilderness.",
+        worstMonths: ["Oct","Nov","Dec","Jan","Feb","Mar","Apr"],
+        worstReason: "Extreme winter darkness and freezing conditions."
+      },
+
+      "Turkmenistan": {
+        months: ["Mar","Apr","Oct","Nov"],
+        bestReason: "Moderate temperatures in an otherwise extreme desert climate.",
+        worstMonths: ["May","Jun","Jul","Aug","Dec","Jan","Feb"],
+        worstReason: "Extreme heat and cold make travel difficult."
+      },
+
+      "Mongolia": {
+        months: ["Jun","Jul","Aug","Sep"],
+        bestReason: "Short summer window for steppe and nomadic travel.",
+        worstMonths: ["Nov","Dec","Jan","Feb","Mar","Apr"],
+        worstReason: "Harsh winters with extreme cold and limited access."
+      },
+
+      "China": {
+        months: ["Apr","May","Sep","Oct"],
+        bestReason: "Spring and autumn provide balanced weather across regions.",
+        worstMonths: ["Dec","Jan","Feb","Jul","Aug"],
+        worstReason: "Cold winters and hot, humid summers."
+      },
+
+      "Republic of Korea": {
+        months: ["Apr","May","Sep","Oct"],
+        bestReason: "Cherry blossom spring and crisp autumn conditions.",
+        worstMonths: ["Dec","Jan","Feb","Jul","Aug"],
+        worstReason: "Monsoon summers and cold winters."
+      },
+
+      "Philippines": {
+        months: ["Dec","Jan","Feb","Mar"],
+        bestReason: "Dry season with calm seas and stable travel conditions.",
+        worstMonths: ["May","Jun","Jul","Aug","Sep","Oct"],
+        worstReason: "Typhoon season and heavy rainfall."
+      },
+
+      "Vietnam": {
+        months: ["Nov","Dec","Jan","Feb","Mar"],
+        bestReason: "Dry cooler season across most regions.",
+        worstMonths: ["May","Jun","Jul","Aug","Sep"],
+        worstReason: "Monsoon rains and regional storms."
+      },
+
+      "Cambodia": {
+        months: ["Nov","Dec","Jan","Feb"],
+        bestReason: "Dry season ideal for temples and travel.",
+        worstMonths: ["May","Jun","Jul","Aug","Sep"],
+        worstReason: "Heavy monsoon rains reduce accessibility."
+      },
+
+      "Oman": {
+        months: ["Oct","Nov","Dec","Jan","Feb","Mar"],
+        bestReason: "Cooler desert temperatures suitable for outdoor exploration.",
+        worstMonths: ["May","Jun","Jul","Aug"],
+        worstReason: "Extreme summer heat."
+      },
+
+      "Jordan": {
+        months: ["Mar","Apr","May","Sep","Oct"],
+        bestReason: "Mild weather ideal for desert and archaeological sites.",
+        worstMonths: ["Jun","Jul","Aug","Dec","Jan"],
+        worstReason: "Extreme heat or winter cold depending on season."
+      },
+
+      "Egypt": {
+        months: ["Oct","Nov","Dec","Jan","Feb","Mar"],
+        bestReason: "Mild winter conditions ideal for sightseeing.",
+        worstMonths: ["May","Jun","Jul","Aug"],
+        worstReason: "Extreme summer heat."
+      },
+
+      "Eritrea": {
+        months: ["Nov","Dec","Jan","Feb"],
+        bestReason: "Cooler dry season improves travel comfort.",
+        worstMonths: ["Apr","May","Jun","Jul","Aug","Sep"],
+        worstReason: "High heat and humidity most of the year."
+      },
+
+      "Ethiopia": {
+        months: ["Oct","Nov","Dec","Jan","Feb"],
+        bestReason: "Dry season with clear skies and trekking conditions.",
+        worstMonths: ["Apr","May","Jun","Jul","Aug"],
+        worstReason: "Heavy rains and limited access."
+      },
+
+      "Kenya": {
+        months: ["Jan","Feb","Jun","Jul","Aug","Sep","Oct"],
+        bestReason: "Dry seasons align with safari and wildlife visibility.",
+        worstMonths: ["Apr","May","Nov"],
+        worstReason: "Rainy seasons reduce accessibility."
+      },
+
+      "Tanzania": {
+        months: ["Jun","Jul","Aug","Sep","Oct"],
+        bestReason: "Dry season ideal for safari migration viewing.",
+        worstMonths: ["Mar","Apr","May","Nov"],
+        worstReason: "Long rains reduce accessibility."
+      },
+
+      "Zimbabwe": {
+        months: ["May","Jun","Jul","Aug","Sep","Oct"],
+        bestReason: "Dry season improves safari visibility.",
+        worstMonths: ["Dec","Jan","Feb","Mar"],
+        worstReason: "Wet season reduces wildlife concentration."
+      },
+
+      "South Africa": {
+        months: ["Oct","Nov","Dec","Jan","Feb","Mar"],
+        bestReason: "Warm, dry summer ideal for safari and coast.",
+        worstMonths: ["May","Jun","Jul","Aug"],
+        worstReason: "Winter reduces coastal and safari conditions."
+      },
+
+      "United Kingdom": {
+        months: ["May","Jun","Jul","Aug","Sep"],
+        bestReason: "Mild summer with long daylight hours.",
+        worstMonths: ["Nov","Dec","Jan","Feb","Mar"],
+        worstReason: "Cold, wet winters with limited daylight."
+      },
+
+      "Greece": {
+        months: ["May","Jun","Sep","Oct"],
+        bestReason: "Warm but not peak heat; ideal for islands and ruins.",
+        worstMonths: ["Nov","Dec","Jan","Feb","Mar"],
+        worstReason: "Cooler winters with reduced island activity."
+      },
+
+      "Türkiye": {
+        months: ["Apr","May","Sep","Oct"],
+        bestReason: "Balanced spring and autumn conditions.",
+        worstMonths: ["Dec","Jan","Feb","Jul","Aug"],
+        worstReason: "Extreme summer heat and winter cold."
+      },
+
+      "Azerbaijan": {
+        months: ["Apr","May","Sep","Oct"],
+        bestReason: "Mild transitional seasons.",
+        worstMonths: ["Dec","Jan","Feb","Jul","Aug"],
+        worstReason: "Hot summers and cold winters."
+      },
+
+      "India": {
+        months: ["Nov","Dec","Jan","Feb"],
+        bestReason: "Post-monsoon dry season with cooler temperatures.",
+        worstMonths: ["Apr","May","Jun","Jul","Aug","Sep"],
+        worstReason: "Heatwaves and monsoon rains across regions."
+      },
+
+      "Nepal": {
+        months: ["Mar","Apr","Oct","Nov"],
+        bestReason: "Clear skies ideal for trekking and mountain views.",
+        worstMonths: ["May","Jun","Jul","Aug","Dec","Jan"],
+        worstReason: "Monsoon rains and winter cold."
+      },
+
+      "Bhutan": {
+        months: ["Mar","Apr","Oct","Nov"],
+        bestReason: "Clear Himalayan visibility and trekking conditions.",
+        worstMonths: ["May","Jun","Jul","Aug","Dec","Jan"],
+        worstReason: "Monsoon and winter restrict travel."
+      },
+
+      "Maldives": {
+        months: ["Nov","Dec","Jan","Feb","Mar","Apr"],
+        bestReason: "Dry season with calm seas and diving visibility.",
+        worstMonths: ["Jun","Jul","Aug","Sep"],
+        worstReason: "Monsoon season reduces visibility and increases rain."
+      },
+
+      "Iceland": {
+        months: ["Jun","Jul","Aug"],
+        bestReason: "Midnight sun and accessible roads.",
+        worstMonths: ["Oct","Nov","Dec","Jan","Feb","Mar","Apr"],
+        worstReason: "Harsh winter conditions and limited daylight."
+      }
+    };
+
     // ── Original path geometry (UNCHANGED) ──────────────────────
     function buildSegment(p1, p2, startMode = null, endMode = null) {
       const dx = p2.x - p1.x, dy = p2.y - p1.y;
@@ -561,6 +859,7 @@
       fetchClimate(info.lat, info.lon);
       renderWater(info.water, info.waterNote);
       fetchCost(info.country);
+      renderBestTime(info.country);
     }
 
     function setCardShimmer(id, label) {
@@ -655,6 +954,39 @@
       } catch (e) {
         card.innerHTML = `<div class="info-card-label">Climate</div><p>Climate data unavailable.</p>`;
       }
+    }
+
+    // When to go
+    function renderBestTime(country) {
+      const data = BEST_TIME_TO_VISIT[country];
+
+      const grid = document.getElementById("besttime-grid");
+      const text = document.getElementById("besttime-text");
+
+      if (!data) {
+        grid.innerHTML = "<p>No data</p>";
+        text.innerHTML = "";
+        return;
+      }
+
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+      const state = (m) => {
+        if (data.months.includes(m)) return "best";
+        if (data.worstMonths.includes(m)) return "worst";
+        return "shoulder";
+      };
+
+      grid.className = "besttime-grid";
+
+      grid.innerHTML = months.map(m => {
+        return `<div class="besttime-cell ${state(m)}" title="${m}"></div>`;
+      }).join("");
+
+      text.innerHTML = `
+        <div><strong>Best times:</strong> ${data.bestReason}</div>
+        <div style="margin-top:6px"><strong>Worst times:</strong> ${data.worstReason}</div>
+      `;
     }
 
     // ── Water safety ─────────────────────────────────────────────
