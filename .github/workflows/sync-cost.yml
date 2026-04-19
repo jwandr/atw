@@ -70,7 +70,7 @@ jobs:
 
           # ── 2. Read destination JSONs to get city slugs ───────────────────
           # Look in the two possible data directories
-          data_dirs = ['data', 'travel-guides/data']
+          data_dirs = ['data', 'atw/travel-guides/data']
           data_dir = None
           for d in data_dirs:
               if os.path.isdir(d):
