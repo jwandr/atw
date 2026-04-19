@@ -27,14 +27,8 @@ jobs:
           URL = "https://www.smartraveller.gov.au/destinations-export"
 
           HEADERS = {
-              "Accept": "application/json, text/plain, */*",
-              "Accept-Language": "en-AU,en;q=0.9",
-              "User-Agent": (
-                  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/124.0.0.0 Safari/537.36"
-              ),
-              "Referer": "https://www.smartraveller.gov.au/",
+              "User-Agent": "Mozilla/5.0",
+              "Accept": "application/json",
           }
 
           data = None
@@ -44,13 +38,13 @@ jobs:
               try:
                   print(f"Attempt {attempt}…")
                   # Force HTTP/1.1 to avoid HTTP/2 stream errors (exit code 92)
-                  resp = requests.get(URL, headers=HEADERS, timeout=30)
+                  resp = requests.get(URL, headers=HEADERS, timeout=(10, 60))
                   print(f"  Status: {resp.status_code}  Size: {len(resp.content)} bytes")
                   print(f"  First 200 chars: {resp.text[:200]}")
 
                   if resp.status_code != 200:
                       last_error = f"HTTP {resp.status_code}"
-                      time.sleep(5)
+                      time.sleep(5 * attempt)
                       continue
 
                   data = resp.json()
