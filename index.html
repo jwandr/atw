@@ -515,38 +515,65 @@
     // ── Climate (Open-Meteo) ─────────────────────────────────────
     async function fetchClimate(lat, lon) {
       const card = document.getElementById("card-climate");
-      try {
-        const url = "https://climate-api.open-meteo.com/v1/climate" +
-          "?latitude=" + lat +
-          "&longitude=" + lon +
-          "&start_date=1991-01-01&end_date=2020-12-31" +
-          "&monthly=temperature_2m_max,temperature_2m_min,precipitation_sum" +
-          "&models=EC_Earth3P_HR";
 
-        const res  = await fetch(url);
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
-        if (!data.monthly) throw new Error("no monthly field in response");
+      try {
+        const year  = new Date().getFullYear() - 1;
+        const start = `${year}-01-01`;
+        const end   = `${year}-12-31`;
+
+        const url = `https://archive-api.open-meteo.com/v1/archive` +
+          `?latitude=${lat}` +
+          `&longitude=${lon}` +
+          `&start_date=${start}` +
+          `&end_date=${end}` +
+          `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum`;
+
+        const data = await fetch(url).then(r => r.json());
+
+        if (!data.daily || !data.daily.time) throw new Error("No data");
+
+        const times = data.daily.time;
+        const hiArr = data.daily.temperature_2m_max;
+        const loArr = data.daily.temperature_2m_min;
+        const rnArr = data.daily.precipitation_sum;
+
+        const buckets = Array.from({ length: 12 }, () => ({ hi: [], lo: [], rn: [] }));
+
+        times.forEach((t, i) => {
+          const mo = parseInt(t.slice(5, 7), 10) - 1;
+          if (hiArr[i] != null) buckets[mo].hi.push(hiArr[i]);
+          if (loArr[i] != null) buckets[mo].lo.push(loArr[i]);
+          if (rnArr[i] != null) buckets[mo].rn.push(rnArr[i]);
+        });
+
+        const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null;
+        const sum = arr => arr.length ? arr.reduce((a,b)=>a+b,0) : null;
 
         const MO   = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-        const hi   = data.monthly.temperature_2m_max;
-        const lo   = data.monthly.temperature_2m_min;
-        const rain = data.monthly.precipitation_sum;
-        const keys = [0, 3, 6, 9];
+        const keys = [0,3,6,9];
 
-        const cells = keys.map(i => `
-          <div class="weather-month">
-            <div class="wm-name">${MO[i]}</div>
-            <div class="wm-hi">${Math.round(hi[i])}°</div>
-            <div class="wm-lo">${Math.round(lo[i])}° lo</div>
-            <div class="wm-rain">${Math.round(rain[i])}mm</div>
-          </div>`).join("");
+        const cells = keys.map(i => {
+          const hi = avg(buckets[i].hi);
+          const lo = avg(buckets[i].lo);
+          const rn = sum(buckets[i].rn);
+
+          return `
+            <div class="weather-month">
+              <div class="wm-name">${MO[i]}</div>
+              <div class="wm-hi">${hi != null ? Math.round(hi) + "°" : "–"}</div>
+              <div class="wm-lo">${lo != null ? Math.round(lo) + "° lo" : "–"}</div>
+              <div class="wm-rain">${rn != null ? Math.round(rn) + "mm" : "–"}</div>
+            </div>`;
+        }).join("");
 
         card.innerHTML = `
-          <div class="info-card-label">Climate (30-yr avg)</div>
+          <div class="info-card-label">Climate</div>
           <div class="weather-grid">${cells}</div>
-          <p style="margin-top:6px;font-size:11px;color:#aaa">Jan / Apr / Jul / Oct · hi / lo / rain</p>`;
-      } catch(e) {
+          <p style="margin-top:6px;font-size:11px;color:#aaa">
+            ${year} actuals · Jan / Apr / Jul / Oct
+          </p>`;
+
+      } catch (e) {
         card.innerHTML = `<div class="info-card-label">Climate</div><p>Climate data unavailable.</p>`;
       }
     }
