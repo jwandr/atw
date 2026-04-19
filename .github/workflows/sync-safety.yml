@@ -87,7 +87,7 @@ jobs:
 
           candidates = [
               'data/safety-cache.json',
-              'atw/travel-guides/data/safety-cache.json',
+              'travel-guides/data/safety-cache.json',
           ]
           target = None
           for p in candidates:
