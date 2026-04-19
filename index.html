@@ -968,7 +968,7 @@
           const lo = avg(buckets[i].lo);
           const rn = sum(buckets[i].rn);
 
-          const icon = getWeatherIcon(hi, rn);
+          const icon = getWeatherIcon(hi, rn, lat);
 
           return `
             <div class="weather-month">
