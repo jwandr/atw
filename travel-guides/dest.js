@@ -60,13 +60,10 @@
   function render(d) {
     document.title = `${d.title} | Travel Guides`;
 
-    // Update header breadcrumb
     const crumb = document.getElementById('nav-crumb');
     if (crumb) crumb.textContent = d.title;
 
     const page = document.querySelector('.page');
-
-    // Keep the site-header, remove everything else
     const header = page.querySelector('.site-header');
     page.innerHTML = '';
     if (header) page.append(header);
@@ -85,13 +82,11 @@
     }
     page.append(hero);
 
-    // Title + tagline
     page.append(
       el('h1', { class: 'dest-title' }, d.title),
       el('p',  { class: 'dest-tagline' }, d.tagline),
     );
 
-    // Snapshot pills
     const snapItems = [
       { ic: 'calendar_month', text: `Best time: ${d.snapshot.best_time}` },
       { ic: 'schedule',       text: d.snapshot.duration },
@@ -103,12 +98,11 @@
       ...snapItems.map(s => el('div', { class: 'tag' }, icon(s.ic, 'icon-sm'), s.text))
     ));
 
-    // Quick facts
     const facts = [
-      { ic: 'schedule',     label: 'Timezone',  val: d.quick_facts.timezone  },
-      { ic: 'travel_explore', label: 'Visa',    val: d.quick_facts.visa      },
-      { ic: 'record_voice_over', label: 'Language', val: d.quick_facts.language },
-      { ic: 'credit_card',  label: 'Payments',  val: d.quick_facts.payments  },
+      { ic: 'schedule',          label: 'Timezone',  val: d.quick_facts.timezone  },
+      { ic: 'travel_explore',    label: 'Visa',      val: d.quick_facts.visa      },
+      { ic: 'record_voice_over', label: 'Language',  val: d.quick_facts.language  },
+      { ic: 'credit_card',       label: 'Payments',  val: d.quick_facts.payments  },
     ];
     page.append(el('div', { class: 'quick-facts' },
       ...facts.map(f =>
@@ -122,23 +116,22 @@
       )
     ));
 
-    // Sidebar panels (rendered now, data filled async)
     const safetyPanelEl  = makeSafetyPanel();
     const weatherPanelEl = makeWeatherPanel();
     const ratePanelEl    = makeRatePanel(d);
+    const costPanelEl    = makeCostPanel(d);
 
-    // Two-column grid
     page.append(
       el('div', { class: 'grid' },
 
         el('div', {},
-          section('star',            'Why go',              cardList(d.why_go)),
+          section('star',            'Why go',               cardList(d.why_go)),
           section('hotel_class',     'Essential experiences', cardList(d.essential_experiences)),
           renderSeasonality(d),
-          section('restaurant',      'Food & drink',        cardList(d.food_and_drink)),
-          section('directions',      'Logistics',           cardList(d.logistics)),
-          section('report',          'Friction factors',    cardList(d.friction_factors)),
-          section('tips_and_updates','Tips & watchouts',    cardList(d.tips)),
+          section('restaurant',      'Food & drink',         cardList(d.food_and_drink)),
+          section('directions',      'Logistics',            cardList(d.logistics)),
+          section('report',          'Friction factors',     cardList(d.friction_factors)),
+          section('tips_and_updates','Tips & watchouts',     cardList(d.tips)),
           renderItinerary(d),
         ),
 
@@ -147,11 +140,11 @@
           makeWaterPanel(d.water_safety),
           weatherPanelEl,
           ratePanelEl,
+          costPanelEl,
         ),
       )
     );
 
-    // Verdict
     page.append(
       el('div', { class: 'verdict' },
         el('div', { class: 'verdict-label' }, icon('verified', 'icon-sm'), 'Verdict'),
@@ -159,7 +152,6 @@
       )
     );
 
-    // Async panel data
     fetchSafety(d, safetyPanelEl);
     fetchWeather(d, weatherPanelEl);
     fetchRate(d, ratePanelEl);
@@ -175,9 +167,9 @@
     );
     const legend = el('div', { class: 'season-legend' },
       ...[
-        { cls: 'good', dot: '#86efac', label: 'Good' },
-        { cls: 'ok',   dot: '#fde047', label: 'OK'   },
-        { cls: 'bad',  dot: '#fca5a5', label: 'Avoid'},
+        { dot: '#86efac', label: 'Good' },
+        { dot: '#fde047', label: 'OK'   },
+        { dot: '#fca5a5', label: 'Avoid'},
       ].map(({ dot, label }) =>
         el('span', {},
           el('span', { class: 's-dot', style: `background:${dot}` }),
@@ -216,7 +208,7 @@
   }
 
   function makeWaterPanel(w) {
-    const cls     = { safe:'safe', caution:'caution', unsafe:'danger' }[w.status] || 'caution';
+    const cls      = { safe:'safe', caution:'caution', unsafe:'danger' }[w.status] || 'caution';
     const iconName = { safe:'water_drop', caution:'water_drop', unsafe:'do_not_disturb_on' }[w.status] || 'water_drop';
     return el('div', { class: `panel ${cls}` },
       panelTitle(iconName, 'Water safety'),
@@ -240,24 +232,43 @@
     );
   }
 
+  // Cost of living — static panel linking to Expatistan Perth vs destination.
+  // Expatistan has no public API, but their comparison URLs are stable and
+  // readable. Add "expatistan_city" to a destination's JSON to override the
+  // slug if the auto-generated one doesn't match (e.g. "buenos-aires" not "patagonia").
+  function makeCostPanel(d) {
+    const destSlug = (d.expatistan_city || d.title)
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+
+    const url = `https://www.expatistan.com/cost-of-living/comparison/perth/${destSlug}`;
+
+    return el('div', { class: 'panel' },
+      panelTitle('shopping_cart', 'Cost of living'),
+      el('p', { style: 'font-size:0.81rem;color:var(--muted);margin-bottom:8px;' },
+        `How ${d.title} compares to Perth — food, rent, transport & more.`),
+      el('a', { href: url, target: '_blank', rel: 'noopener' },
+        icon('open_in_new', 'icon-sm'),
+        ` Perth vs ${d.title}`,
+      ),
+    );
+  }
+
   // ─── Async: Smartraveller ─────────────────────────────────────────────────
-  // Strategy: nightly cache only. The live CORS proxy (allorigins) is too
-  // unreliable to be worth a round-trip — if the cache misses, show fallback.
+  // Cache-only. The nightly GitHub Action populates data/safety-cache.json.
+  // If _fetched_at is null the Action hasn't run yet — show fallback link.
 
   async function fetchSafety(d, panel) {
     try {
-      let country;
+      const r = await fetch('../data/safety-cache.json');
+      if (!r.ok) throw new Error('Cache fetch failed');
+      const cache = await r.json();
 
-      // Try nightly cache (written by GitHub Action)
-      try {
-        const r = await fetch('../data/safety-cache.json');
-        if (r.ok) {
-          const cache = await r.json();
-          country = cache[d.smartraveller_country];
-        }
-      } catch (_) {}
+      if (!cache._fetched_at) throw new Error('Cache not yet populated');
 
-      if (!country) throw new Error('Not in cache');
+      const country = cache[d.smartraveller_country];
+      if (!country) throw new Error('Country not in cache');
 
       const level = country.advice_level;
       panel.className = `panel ${SAFETY_CLASS[level] || 'caution'}`;
@@ -271,14 +282,13 @@
       );
 
     } catch (_) {
-      // Graceful fallback — link directly to Smartraveller
       const slug = d.smartraveller_country.toLowerCase().replace(/ /g, '-');
       panel.className = 'panel caution';
       panel.innerHTML = '';
       panel.append(
         panelTitle('warning', 'Safety advice'),
         el('div', { class: 'badge' }, 'Check before travel'),
-        el('p', {}, 'Live advice unavailable — check Smartraveller directly.'),
+        el('p', {}, 'Safety data not yet synced — check Smartraveller directly.'),
         el('a', {
           href: `https://www.smartraveller.gov.au/destinations/${slug}`,
           target: '_blank', rel: 'noopener',
@@ -287,33 +297,36 @@
     }
   }
 
-  // ─── Async: Open-Meteo climate ────────────────────────────────────────────
-  // Uses the open-meteo forecast API with past data (free, no key, CORS-safe).
-  // We fetch the last 12 months of daily data and bucket by month ourselves,
-  // which is far more reliable than the climate normals endpoint.
+  // ─── Async: Open-Meteo historical archive ────────────────────────────────
+  // archive-api.open-meteo.com requires explicit start_date + end_date.
+  // We use the previous full calendar year for clean 12-month coverage.
 
   async function fetchWeather(d, panel) {
     if (!d.climate) return;
     try {
-      // Use the standard forecast API in "past" mode — always works, no model arg needed
+      const year  = new Date().getFullYear() - 1;
+      const start = `${year}-01-01`;
+      const end   = `${year}-12-31`;
+
       const url = [
-        'https://api.open-meteo.com/v1/forecast',
-        `?latitude=${d.climate.lat}&longitude=${d.climate.lon}`,
+        'https://archive-api.open-meteo.com/v1/archive',
+        `?latitude=${d.climate.lat}`,
+        `&longitude=${d.climate.lon}`,
+        `&start_date=${start}`,
+        `&end_date=${end}`,
         '&daily=temperature_2m_max,temperature_2m_min,precipitation_sum',
-        '&past_days=365',
-        '&forecast_days=1',
-        '&timezone=auto',
       ].join('');
 
       const data = await fetch(url).then(r => r.json());
+      if (data.error) throw new Error(data.reason || 'API error');
       if (!data.daily || !data.daily.time) throw new Error('No data');
 
-      const times = data.daily.time;           // "YYYY-MM-DD"
+      const times = data.daily.time;
       const hiArr = data.daily.temperature_2m_max;
       const loArr = data.daily.temperature_2m_min;
       const rnArr = data.daily.precipitation_sum;
 
-      // Bucket daily values into calendar months (0–11)
+      // Bucket into months
       const buckets = Array.from({ length: 12 }, () => ({ hi: [], lo: [], rn: [] }));
       times.forEach((t, i) => {
         const mo = parseInt(t.slice(5, 7), 10) - 1;
@@ -322,27 +335,22 @@
         if (rnArr[i] != null) buckets[mo].rn.push(rnArr[i]);
       });
 
-      const avg  = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
-      const sum  = arr => arr.length ? arr.reduce((a, b) => a + b, 0) : null;
-      const MO   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-      // Pick 4 representative months: Jan, Apr, Jul, Oct
-      const keys = [0, 3, 6, 9];
+      const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+      const sum = arr => arr.length ? arr.reduce((a, b) => a + b, 0) : null;
+      const MO  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
       const grid = el('div', { class: 'weather-grid' },
-        ...keys.map(i => {
+        ...[0, 3, 6, 9].map(i => {
           const hi = avg(buckets[i].hi);
           const lo = avg(buckets[i].lo);
-          const rn = sum(buckets[i].rn) != null
-            ? Math.round(sum(buckets[i].rn) / Math.max(buckets[i].rn.length / 30, 1))
-            : null;
+          const rn = sum(buckets[i].rn);
           return el('div', { class: 'weather-month' },
             el('div', { class: 'wm-name' }, MO[i]),
             el('div', { class: 'wm-hi' },   hi != null ? `${Math.round(hi)}°` : '–'),
             el('div', { class: 'wm-lo' },   lo != null ? `${Math.round(lo)}° lo` : '–'),
             el('div', { class: 'wm-rain' },
               icon('water_drop', 'icon-sm'),
-              rn != null ? `${rn}mm` : '–',
+              rn != null ? `${Math.round(rn)}mm` : '–',
             ),
           );
         })
@@ -352,17 +360,21 @@
       panel.append(
         panelTitle('thermostat', 'Climate'),
         grid,
-        el('p', { style: 'margin-top:8px;font-size:0.74rem;' }, 'Past-year averages · Jan / Apr / Jul / Oct'),
+        el('p', { style: 'margin-top:8px;font-size:0.74rem;' },
+          `${year} actuals · Jan / Apr / Jul / Oct`),
       );
     } catch (_) {
       panel.innerHTML = '';
-      panel.append(panelTitle('thermostat', 'Climate'), el('p', {}, 'Data unavailable.'));
+      panel.append(
+        panelTitle('thermostat', 'Climate'),
+        el('p', {}, 'Weather data unavailable.'),
+      );
     }
   }
 
-  // ─── Async: Exchange rate ──────────────────────────────────────────────────
-  // Frankfurter redirects to HTTPS and loses CORS headers on the 301.
-  // Use the ExchangeRate-API open endpoint instead — no key, proper CORS.
+  // ─── Async: Exchange rate (open.er-api.com) ───────────────────────────────
+  // Frankfurter's HTTP→HTTPS 301 redirect strips CORS headers.
+  // open.er-api.com is free, keyless, and returns proper CORS headers.
 
   async function fetchRate(d, panel) {
     const code = d.currency.code;
@@ -372,8 +384,7 @@
       return;
     }
     try {
-      // open.er-api.com — free tier, no key, correct CORS headers
-      const data = await fetch(`https://open.er-api.com/v6/latest/AUD`).then(r => r.json());
+      const data = await fetch('https://open.er-api.com/v6/latest/AUD').then(r => r.json());
       if (data.result !== 'success') throw new Error('API error');
       const rate = data.rates[code];
       if (!rate) throw new Error('Currency not found');
