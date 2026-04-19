@@ -151,19 +151,14 @@
           <div class="weather-month"><div class="shimmer" style="height:48px"></div></div>
         </div>
       </div>
-      <div class="info-card" id="card-water">
-        <div class="info-card-label">Water Safety</div>
-        <div class="shimmer" style="width:50%"></div>
-      </div>
-      <div class="info-card" id="card-safety">
-        <div class="info-card-label">Travel Safety</div>
-        <div class="shimmer" style="width:70%"></div>
-        <div class="shimmer" style="width:45%;margin-top:6px"></div>
-      </div>
       <div class="info-card" id="card-cost">
         <div class="info-card-label">Cost of Living</div>
         <div class="shimmer" style="width:60%"></div>
         <div class="shimmer" style="width:80%;margin-top:4px"></div>
+      </div>
+      <div class="info-card" id="card-water">
+        <div class="info-card-label">Water Safety</div>
+        <div class="shimmer" style="width:50%"></div>
       </div>
     </div>
   </div>
@@ -481,7 +476,6 @@
 
       setCardShimmer("card-climate", "Climate");
       setCardShimmer("card-water",   "Water Safety");
-      setCardShimmer("card-safety",  "Travel Safety");
       setCardShimmer("card-cost",    "Cost of Living");
 
       document.getElementById("info-panel").classList.add("open");
@@ -494,7 +488,6 @@
 
       fetchClimate(info.lat, info.lon);
       renderWater(info.water, info.waterNote);
-      fetchSafety(info.country);
       fetchCost(info.country);
     }
 
@@ -513,6 +506,17 @@
     document.getElementById("panel-backdrop").addEventListener("click", closePanel);
 
     // ── Climate (Open-Meteo) ─────────────────────────────────────
+    function getWeatherIcon(temp, rain) {
+      if (temp == null) return "—";
+
+      if (rain > 120) return "🌧️";      // very wet
+      if (rain > 60)  return "🌦️";      // some rain
+      if (temp >= 28) return "☀️";      // hot
+      if (temp >= 18) return "🌤️";      // warm
+      if (temp >= 10) return "⛅";      // mild
+      return "❄️";                      // cold
+    }
+
     async function fetchClimate(lat, lon) {
       const card = document.getElementById("card-climate");
 
@@ -557,9 +561,12 @@
           const lo = avg(buckets[i].lo);
           const rn = sum(buckets[i].rn);
 
+          const icon = getWeatherIcon(hi, rn);
+
           return `
             <div class="weather-month">
               <div class="wm-name">${MO[i]}</div>
+              <div style="font-size:16px;margin-bottom:2px">${icon}</div>
               <div class="wm-hi">${hi != null ? Math.round(hi) + "°" : "–"}</div>
               <div class="wm-lo">${lo != null ? Math.round(lo) + "° lo" : "–"}</div>
               <div class="wm-rain">${rn != null ? Math.round(rn) + "mm" : "–"}</div>
@@ -584,51 +591,9 @@
       const bc    = { safe:"badge-safe", caution:"badge-caution", unsafe:"badge-danger" }[status] || "badge-caution";
       const label = { safe:"Safe to drink", caution:"Use bottled water", unsafe:"Not safe" }[status] || "Check locally";
       card.innerHTML = `
-        <div class="info-card-label">Water Safety</div>
+        <div class="info-card-label">Drinking Water</div>
         <div class="badge ${bc}">${label}</div>
         <p>${note}</p>`;
-    }
-
-    // ── Travel safety (Smartraveller) ────────────────────────────
-    const SAFETY_BADGE = { 1:"badge-safe", 2:"badge-caution", 3:"badge-danger", 4:"badge-danger" };
-
-    async function fetchSafety(countryName) {
-      const card = document.getElementById("card-safety");
-      try {
-        let country;
-
-        try {
-          const r = await fetch("travel-guides/data/safety-cache.json");
-          if (r.ok) {
-            const cache = await r.json();
-            country = cache[countryName];
-          }
-        } catch(_) {}
-
-        if (!country) {
-          const proxy = "https://api.allorigins.win/get?url=" + encodeURIComponent("https://www.smartraveller.gov.au/destinations-export");
-          const r     = await fetch(proxy);
-          const body  = await r.json();
-          const list  = JSON.parse(body.contents);
-          country     = list.find(c => c.name === countryName);
-        }
-
-        if (!country) throw new Error("not found");
-
-        const level = country.advice_level;
-        const bc    = SAFETY_BADGE[level] || "badge-caution";
-        card.innerHTML = `
-          <div class="info-card-label">Travel Safety (Smartraveller)</div>
-          <div class="badge ${bc}">Level ${level}: ${country.advice_text}</div>
-          <p>Updated ${country.last_updated}</p>
-          <a href="${country.url}" target="_blank" rel="noopener">Full advice →</a>`;
-      } catch(_) {
-        const slug = countryName.toLowerCase().replace(/ /g, "-");
-        card.innerHTML = `
-          <div class="info-card-label">Travel Safety</div>
-          <div class="badge badge-caution">Check before travel</div>
-          <a href="https://www.smartraveller.gov.au/destinations/${slug}" target="_blank" rel="noopener">View Smartraveller →</a>`;
-      }
     }
 
     // ── Cost of living ───────────────────────────────────────────
