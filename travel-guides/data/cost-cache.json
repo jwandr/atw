@@ -1,5 +1,5 @@
 {
-  "_fetched_at": "2026-04-21T09:12:26.797976Z",
+  "_fetched_at": "2026-04-22T09:00:47.495948Z",
   "_australia_col": 67.9,
   "_australia_rent": 33.7,
   "_australia_grocery": 76.5,
@@ -937,7 +937,7 @@
     }
   },
   "city_prices": {
-    "patagonia": {},
-    "athens": {}
+    "athens": {},
+    "patagonia": {}
   }
 }
