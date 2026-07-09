@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Field Notes — a sense-of-place map</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F1E9D8;
+    --paper-dark: #E7DBC2;
+    --ink: #24303F;
+    --ink-soft: #4C5A6B;
+    --brass: #97713F;
+    --brass-deep: #6E5227;
+    --teal: #2F6B5E;
+    --line: #C9B896;
+    --shadow: rgba(36,48,63,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 20%, rgba(151,113,63,0.05), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(47,107,94,0.05), transparent 40%),
+      var(--paper);
+    font-family: 'Source Serif 4', serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+  header{
+    display:flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .brand-eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brass-deep);
+    margin: 0 0 4px;
+  }
+  h1{
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 34px;
+    margin: 0;
+    color: var(--ink);
+  }
+  .sub{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    max-width: 320px;
+    text-align: right;
+    line-height: 1.5;
+  }
+  .layout{
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 22px;
+    align-items: start;
+  }
+  @media (max-width: 860px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+  #map{
+    height: 560px;
+    border: 1px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--shadow);
+    filter: sepia(8%) saturate(85%);
+  }
+  .panel{
+    border: 1px solid var(--ink);
+    background: var(--paper-dark);
+    box-shadow: 4px 4px 0 var(--shadow);
+    min-height: 560px;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-head{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--ink);
+    padding: 8px 16px;
+  }
+  .panel-body{
+    padding: 22px 22px 18px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .empty-state{
+    color: var(--ink-soft);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+  .place-name{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 26px;
+    margin: 0 0 2px;
+  }
+  .place-city{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--brass-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .section-label{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 18px 0 6px;
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 4px;
+  }
+  .section-label:first-of-type{ margin-top: 0; }
+  .vibe-text{
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .best-for{
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+  ul.anchors{
+    margin: 0;
+    padding-left: 18px;
+  }
+  ul.anchors li{
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 3px;
+  }
+  .insight-box{
+    background: var(--paper);
+    border-left: 3px solid var(--teal);
+    padding: 10px 12px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .loading{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .loading .dot{
+    animation: blink 1.2s infinite;
+  }
+  .loading .dot:nth-child(2){ animation-delay: 0.2s; }
+  .loading .dot:nth-child(3){ animation-delay: 0.4s; }
+  @keyframes blink{ 0%,100%{opacity:0.2;} 50%{opacity:1;} }
+  .cache-flag{
+    display:inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--teal);
+    border: 1px solid var(--teal);
+    padding: 2px 6px;
+    margin-top: 14px;
+  }
+  .footer-note{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 20px;
+    line-height: 1.6;
+    border-top: 1px dashed var(--line);
+    padding-top: 14px;
+  }
+  .leaflet-popup-content-wrapper{
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 0;
+  }
+  .leaflet-popup-tip{ background: var(--ink); }
+  .leaflet-popup-content{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+  .pin-city{ color: var(--paper-dark); opacity:0.7; }
+  .error-text{ color: #8c3b3b; font-family:'IBM Plex Mono',monospace; font-size:12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <p class="brand-eyebrow">Field Notes / Prototype</p>
+      <h1>a sense of place, on demand</h1>
+    </div>
+    <p class="sub">Twelve marked neighbourhoods, three cities. Click a pin — the character notes are generated the first time and kept from then on.</p>
+  </header>
+
+  <div class="layout">
+    <div id="map"></div>
+    <div class="panel">
+      <div class="panel-head" id="panel-head">Field Note</div>
+      <div class="panel-body" id="panel-body">
+        <div class="empty-state">
+          No pin selected yet.<br><br>
+          Click any marker — Fremantle, Alfama, Shimokitazawa, and nine others are seeded for this prototype. Each generates a short character note: what the place feels like, who it suits, a few anchors, and one thing that isn't obvious from a map.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-note">
+    Prototype scope: 12 hand-picked neighbourhoods across Perth, Lisbon, and Tokyo, so you can judge whether the generated notes are actually useful before this goes any wider. A working version would let you click anywhere — not just seeded pins — and would ground each note in real source text (Wikivoyage, OSM tags) rather than the model's own knowledge alone.
+  </p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const PLACES = [
+  { id: 'fremantle', name: 'Fremantle', city: 'Perth', lat: -32.0569, lng: 115.7439 },
+  { id: 'northbridge', name: 'Northbridge', city: 'Perth', lat: -31.9484, lng: 115.8570 },
+  { id: 'subiaco', name: 'Subiaco', city: 'Perth', lat: -31.9483, lng: 115.8259 },
+  { id: 'mtlawley', name: 'Mount Lawley', city: 'Perth', lat: -31.9350, lng: 115.8794 },
+
+  { id: 'alfama', name: 'Alfama', city: 'Lisbon', lat: 38.7139, lng: -9.1301 },
+  { id: 'bairroalto', name: 'Bairro Alto', city: 'Lisbon', lat: 38.7136, lng: -9.1466 },
+  { id: 'belem', name: 'Belém', city: 'Lisbon', lat: 38.6970, lng: -9.2033 },
+  { id: 'principereal', name: 'Príncipe Real', city: 'Lisbon', lat: 38.7167, lng: -9.1500 },
+
+  { id: 'shimokitazawa', name: 'Shimokitazawa', city: 'Tokyo', lat: 35.6613, lng: 139.6683 },
+  { id: 'yanaka', name: 'Yanaka', city: 'Tokyo', lat: 35.7272, lng: 139.7672 },
+  { id: 'shibuya', name: 'Shibuya', city: 'Tokyo', lat: 35.6595, lng: 139.7005 },
+  { id: 'kagurazaka', name: 'Kagurazaka', city: 'Tokyo', lat: 35.7025, lng: 139.7400 },
+];
+
+const map = L.map('map', { scrollWheelZoom: true }).setView([20, 40], 2);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  maxZoom: 18
+}).addTo(map);
+
+const inkIcon = L.divIcon({
+  className: '',
+  html: `<div style="width:12px;height:12px;border-radius:50%;background:#97713F;border:2px solid #24303F;box-shadow:0 0 0 2px #F1E9D8;"></div>`,
+  iconSize: [12,12],
+  iconAnchor: [6,6]
+});
+
+const panelHead = document.getElementById('panel-head');
+const panelBody = document.getElementById('panel-body');
+
+PLACES.forEach(p => {
+  const marker = L.marker([p.lat, p.lng], { icon: inkIcon }).addTo(map);
+  marker.bindPopup(`<strong>${p.name}</strong><br><span class="pin-city">${p.city}</span>`);
+  marker.on('click', () => selectPlace(p));
+});
+
+function renderLoading(place){
+  panelHead.textContent = `${place.city} — ${place.name}`;
+  panelBody.innerHTML = `
+    <p class="place-name">${place.name}</p>
+    <p class="place-city">${place.city}</p>
+    <p class="loading">writing the field note<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></p>
+  `;
+}
+
+function renderError(place, message){
+  panelHead.textContent = `${place.city} — ${place.name}`;
+  panelBody.innerHTML = `
+    <p class="place-name">${place.name}</p>
+    <p class="place-city">${place.city}</p>
+    <p class="error-text">Couldn't generate a note (${message}). Click the pin again to retry.</p>
+  `;
+}
+
+function renderNote(place, note, fromCache){
+  panelHead.textContent = `${place.city} — ${place.name}`;
+  const anchorsHtml = (note.anchors || []).map(a => `<li>${a}</li>`).join('');
+  panelBody.innerHTML = `
+    <p class="place-name">${place.name}</p>
+    <p class="place-city">${place.city}</p>
+
+    <div class="section-label">Character</div>
+    <p class="vibe-text">${note.vibe}</p>
+
+    <div class="section-label">Best for</div>
+    <p class="best-for">${note.bestFor}</p>
+
+    <div class="section-label">Anchors</div>
+    <ul class="anchors">${anchorsHtml}</ul>
+
+    <div class="section-label">One insight</div>
+    <div class="insight-box">${note.insight}</div>
+
+    ${fromCache ? '<div class="cache-flag">from cache</div>' : ''}
+  `;
+}
+
+async function selectPlace(place){
+  renderLoading(place);
+  const cacheKey = `vibe:${place.id}`;
+
+  try {
+    const cached = await window.storage.get(cacheKey, false);
+    if (cached && cached.value) {
+      const note = JSON.parse(cached.value);
+      renderNote(place, note, true);
+      return;
+    }
+  } catch (e) {
+    // no cached value yet, fall through to generation
+  }
+
+  try {
+    const note = await generateNote(place);
+    renderNote(place, note, false);
+    try {
+      await window.storage.set(cacheKey, JSON.stringify(note), false);
+    } catch (e) {
+      console.warn('cache write failed', e);
+    }
+  } catch (e) {
+    console.error(e);
+    renderError(place, e.message || 'unknown error');
+  }
+}
+
+async function generateNote(place){
+  const system = `You are a well-travelled, precise local-knowledge writer creating a short "field note" about a specific neighbourhood or district. Respond ONLY with a raw JSON object, no markdown fences, no preamble, matching exactly this shape:
+{
+  "vibe": "2-3 sentences capturing the atmosphere and character of the place, written evocatively but concretely, in your own words",
+  "bestFor": "one sentence on who this neighbourhood suits (e.g. type of traveller or visit)",
+  "anchors": ["3 to 4 short strings naming genuinely well-known landmarks, streets, or spots in this specific neighbourhood"],
+  "insight": "one practical, slightly non-obvious tip a first-time visitor wouldn't get from a standard guidebook blurb"
+}
+Be specific to the named neighbourhood, not the wider city. Do not invent facts you are not reasonably confident about.`;
+
+  const userMsg = `Neighbourhood: ${place.name}, ${place.city} (approx coordinates ${place.lat.toFixed(4)}, ${place.lng.toFixed(4)})`;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: system,
+      messages: [{ role: "user", content: userMsg }]
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data.content.map(b => b.text || '').join('').trim();
+  const clean = text.replace(/^```json\s*|^```\s*|```$/g, '').trim();
+  return JSON.parse(clean);
+}
+</script>
+</body>
+</html>
