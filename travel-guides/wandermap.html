@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WanderMap</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #12213B;
+    --navy-light: #1B2E4F;
+    --teal: #2F6B5E;
+    --teal-light: #E4F0ED;
+    --ink: #1C2430;
+    --ink-soft: #5B6472;
+    --line: #E4E7EC;
+    --bg: #FFFFFF;
+    --panel-bg: #FAFAFA;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'Inter',sans-serif;
+    color: var(--ink);
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+  }
+  /* Left icon rail */
+  .rail{
+    width:64px;
+    background: var(--navy);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:16px 0;
+    flex-shrink:0;
+  }
+  .rail-logo{
+    width:34px;height:34px;border-radius:9px;
+    background: var(--teal);
+    display:flex;align-items:center;justify-content:center;
+    color:white;font-weight:700;font-size:14px;
+    margin-bottom:24px;
+  }
+  .rail-btn{
+    width:40px;height:40px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    color:#8FA0BE;
+    font-size:11px;
+    margin-bottom:6px;
+    cursor:default;
+  }
+  .rail-btn.active{ background: var(--navy-light); color:#fff; }
+
+  /* Main column */
+  .main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+  }
+  .topbar{
+    height:60px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 18px;
+    flex-shrink:0;
+  }
+  .search-box{
+    flex:1;
+    max-width:420px;
+    position:relative;
+  }
+  .search-box input{
+    width:100%;
+    padding:9px 14px 9px 36px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:14px;
+    font-family:inherit;
+    outline:none;
+  }
+  .search-box input:focus{ border-color: var(--teal); }
+  .search-box .icon{
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    color:var(--ink-soft); font-size:14px;
+  }
+  .status-msg{
+    font-size:12.5px;
+    color: var(--ink-soft);
+  }
+  .breadcrumb{
+    padding:10px 18px;
+    font-size:13px;
+    color: var(--ink-soft);
+    border-bottom:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .breadcrumb strong{ color: var(--ink); }
+
+  .content{
+    flex:1;
+    display:flex;
+    min-height:0;
+  }
+  #map{ flex:1; min-width:0; }
+
+  /* Right panel */
+  .panel{
+    width:420px;
+    flex-shrink:0;
+    border-left:1px solid var(--line);
+    background: var(--bg);
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
+  }
+  .panel-empty{
+    padding:40px 24px;
+    color: var(--ink-soft);
+    font-size:13.5px;
+    line-height:1.6;
+  }
+  .panel-header{
+    padding:22px 22px 14px;
+    border-bottom:1px solid var(--line);
+  }
+  .panel-header h2{
+    margin:0 0 4px;
+    font-size:22px;
+  }
+  .subline-input{
+    border:none;
+    border-bottom:1px dashed var(--line);
+    font-size:13.5px;
+    font-weight:600;
+    color: var(--teal);
+    padding:2px 0;
+    width:100%;
+    font-family:inherit;
+    outline:none;
+    background:transparent;
+  }
+  .panel-body{ padding: 18px 22px 40px; }
+  .field-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color: var(--ink-soft);
+    font-weight:600;
+    margin: 18px 0 6px;
+  }
+  .field-label:first-child{ margin-top:0; }
+  textarea, input[type=text]{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:8px 10px;
+    font-family:inherit;
+    font-size:13.5px;
+    outline:none;
+    resize:vertical;
+  }
+  textarea:focus, input[type=text]:focus{ border-color: var(--teal); }
+  textarea{ min-height:70px; line-height:1.5; }
+  .grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .grid-2 label{
+    font-size:11px;
+    color: var(--ink-soft);
+    display:block;
+    margin-bottom:3px;
+  }
+  .stars{ display:flex; gap:4px; }
+  .star{
+    font-size:20px;
+    cursor:pointer;
+    color:#D8DCE3;
+  }
+  .star.filled{ color:#F5B942; }
+  .tags-row{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .tag-chip{
+    background: var(--teal-light);
+    color: var(--teal);
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:100px;
+  }
+  .top-loc-item{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px;
+    margin-bottom:8px;
+  }
+  .top-loc-item input{ margin-bottom:6px; }
+  .top-loc-item .remove-btn{
+    font-size:11px;
+    color:#B24444;
+    cursor:pointer;
+    float:right;
+  }
+  .add-btn{
+    font-size:12.5px;
+    color: var(--teal);
+    cursor:pointer;
+    font-weight:600;
+    display:inline-block;
+    margin-top:4px;
+  }
+  .save-btn{
+    background: var(--teal);
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:10px 18px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    width:100%;
+    margin-top:22px;
+    font-family:inherit;
+  }
+  .save-btn:disabled{ opacity:0.5; cursor:default; }
+  .save-flash{
+    font-size:12px;
+    color: var(--teal);
+    text-align:center;
+    margin-top:8px;
+    height:14px;
+  }
+  .config-warning{
+    margin:16px;
+    padding:14px 16px;
+    background:#FFF6E5;
+    border:1px solid #F0D488;
+    border-radius:8px;
+    font-size:12.5px;
+    line-height:1.6;
+    color:#6B5622;
+  }
+  .config-warning code{
+    background:#00000010;
+    padding:1px 5px;
+    border-radius:4px;
+  }
+  .suburb-label{
+    background:transparent;
+    border:none;
+    box-shadow:none;
+    font-family:'Inter',sans-serif;
+    text-align:center;
+    pointer-events:none;
+  }
+  .suburb-label .name{
+    font-weight:700;
+    font-size:13px;
+    color:#1C2430;
+    text-shadow:0 1px 2px rgba(255,255,255,0.85), 0 0 6px rgba(255,255,255,0.6);
+  }
+  .suburb-label .sub{
+    font-size:10.5px;
+    color:#3A4454;
+    text-shadow:0 1px 2px rgba(255,255,255,0.85), 0 0 6px rgba(255,255,255,0.6);
+  }
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="rail-logo">W</div>
+  <div class="rail-btn active">Map</div>
+  <div class="rail-btn">Notes</div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="search-box">
+      <span class="icon">⌕</span>
+      <input id="searchInput" type="text" placeholder="Search for a city or suburb…" />
+    </div>
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
+  <div class="breadcrumb" id="breadcrumb">Search a city to begin.</div>
+
+  <div class="content">
+    <div id="map"></div>
+    <div class="panel" id="panel">
+      <div class="panel-empty" id="panelEmpty">
+        Click any suburb outline once it's loaded on the map — you'll be able to add a description, top spots, tags, a rating, and notes here. It all saves to Supabase, so it'll be there next time.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/osmtogeojson@3.0.0-beta.5/osmtogeojson.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+// ---------------------------------------------------------------------
+// CONFIG — fill these in from your Supabase project (Settings > API)
+// ---------------------------------------------------------------------
+const SUPABASE_URL = 'https://xvgzbvnaxcdcinoirzwh.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2Z3pidm5heGNkY2lub2lyendoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyNjQ2MTgsImV4cCI6MjA5Mjg0MDYxOH0.9-IESH8qeR_bTl85fqTxeo8SPs0BZs5etC3pCXzD_FA';
+// ---------------------------------------------------------------------
+
+const configured = SUPABASE_URL.startsWith('http') && SUPABASE_ANON_KEY.length > 20;
+let sb = null;
+if (configured) {
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+  document.getElementById('panelEmpty').insertAdjacentHTML('beforebegin', `
+    <div class="config-warning">
+      <strong>Not connected yet.</strong><br>
+      Add your Supabase project URL and anon key at the top of the script
+      (<code>SUPABASE_URL</code> / <code>SUPABASE_ANON_KEY</code>) — Settings → API
+      in your Supabase dashboard. Run <code>schema.sql</code> there first.
+    </div>
+  `);
+}
+
+const COLORS = ['#2F6B5E', '#97713F', '#6B4C7A', '#3D6B99', '#5C7A44', '#7A3B4A', '#8C6239', '#3E7A87'];
+
+const map = L.map('map', { zoomControl: true }).setView([-31.95, 115.86], 12);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  maxZoom: 19
+}).addTo(map);
+
+let suburbLayerGroup = L.layerGroup().addTo(map);
+let layersById = {};
+let currentSuburb = null;
+
+const statusMsg = document.getElementById('statusMsg');
+const breadcrumb = document.getElementById('breadcrumb');
+const panelEmpty = document.getElementById('panelEmpty');
+const panel = document.getElementById('panel');
+
+function setStatus(msg){ statusMsg.textContent = msg || ''; }
+
+// ---------- Search ----------
+document.getElementById('searchInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') searchCity(e.target.value.trim());
+});
+
+async function searchCity(query){
+  if (!query) return;
+  setStatus('Searching…');
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=1&q=${encodeURIComponent(query)}`);
+    const results = await res.json();
+    if (!results.length) { setStatus('No match found.'); return; }
+    const place = results[0];
+    const bbox = place.boundingbox.map(Number); // [south, north, west, east]
+    map.fitBounds([[bbox[0], bbox[2]], [bbox[1], bbox[3]]]);
+
+    const addr = place.address || {};
+    const cityName = addr.city || addr.town || addr.suburb || place.display_name.split(',')[0];
+    const stateName = addr.state || '';
+    const countryName = addr.country || '';
+    breadcrumb.innerHTML = `${[countryName, stateName, cityName].filter(Boolean).join(' <span style="color:#C4C9D2">›</span> ')}`;
+
+    await loadCitySuburbs(cityName, countryName, bbox);
+  } catch (err) {
+    console.error(err);
+    setStatus('Search failed — see console.');
+  }
+}
+
+// ---------- Load suburbs (Supabase first, Overpass fallback) ----------
+async function loadCitySuburbs(cityName, countryName, bbox){
+  suburbLayerGroup.clearLayers();
+  layersById = {};
+
+  if (!configured) {
+    setStatus('Connect Supabase to load/save suburbs.');
+    return;
+  }
+
+  setStatus('Loading suburbs…');
+  const { data: existing, error } = await sb.from('suburbs').select('*').eq('city', cityName);
+  if (error) { console.error(error); setStatus('Supabase read failed — see console.'); return; }
+
+  if (existing && existing.length > 0) {
+    renderSuburbs(existing);
+    setStatus(`${existing.length} suburb(s) loaded from your library.`);
+    return;
+  }
+
+  setStatus('No suburbs saved yet — fetching boundaries from OpenStreetMap…');
+  try {
+    const rows = await fetchAndSeedFromOverpass(cityName, countryName, bbox);
+    if (rows.length === 0) {
+      setStatus('OSM has no suburb boundaries for this area yet. Try a bigger city, or add suburbs manually later.');
+      return;
+    }
+    renderSuburbs(rows);
+    setStatus(`${rows.length} suburb(s) found via OpenStreetMap and saved.`);
+  } catch (err) {
+    console.error(err);
+    setStatus('OpenStreetMap fetch failed — see console.');
+  }
+}
+
+async function fetchAndSeedFromOverpass(cityName, countryName, bbox){
+  const [south, north, west, east] = bbox;
+  const query = `[out:json][timeout:25];
+    (
+      relation["boundary"="administrative"]["admin_level"~"^(8|9|10)$"](${south},${west},${north},${east});
+      way["boundary"="administrative"]["admin_level"~"^(8|9|10)$"](${south},${west},${north},${east});
+      node["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
+    );
+    out geom;`;
+
+  const res = await fetch('https://overpass-api.de/api/interpreter', {
+    method: 'POST',
+    body: 'data=' + encodeURIComponent(query)
+  });
+  if (!res.ok) throw new Error(`Overpass ${res.status}`);
+  const osmData = await res.json();
+  const geojson = osmtogeojson(osmData);
+
+  const seen = new Set();
+  const toInsert = [];
+  geojson.features.forEach((f, i) => {
+    const name = f.properties && (f.properties.name || (f.properties.tags && f.properties.tags.name));
+    if (!name || seen.has(name)) return;
+    if (!f.geometry) return;
+    seen.add(name);
+    toInsert.push({
+      osm_id: f.id ? Number(String(f.id).replace(/\D/g, '')) || null : null,
+      osm_type: f.properties && f.properties.type,
+      city: cityName,
+      country: countryName || null,
+      name: name,
+      subline: '',
+      color: COLORS[toInsert.length % COLORS.length],
+      boundary: f.geometry,
+      details: {},
+      top_locations: [],
+      tags: []
+    });
+  });
+
+  if (toInsert.length === 0) return [];
+
+  const { data, error } = await sb.from('suburbs').upsert(toInsert, { onConflict: 'city,name' }).select();
+  if (error) throw error;
+  return data;
+}
+
+// ---------- Render ----------
+function renderSuburbs(rows){
+  suburbLayerGroup.clearLayers();
+  layersById = {};
+
+  rows.forEach(row => {
+    if (!row.boundary) return;
+    const feature = { type: 'Feature', properties: {}, geometry: row.boundary };
+    const color = row.color || '#2F6B5E';
+
+    let layer;
+    if (row.boundary.type === 'Point') {
+      layer = L.circleMarker([row.boundary.coordinates[1], row.boundary.coordinates[0]], {
+        radius: 8, color: color, fillColor: color, fillOpacity: 0.5, weight: 2
+      });
+    } else {
+      layer = L.geoJSON(feature, {
+        style: { color: color, weight: 2, fillColor: color, fillOpacity: 0.25 }
+      });
+    }
+
+    const labelHtml = `<div class="name">${row.name}</div>${row.subline ? `<div class="sub">${row.subline}</div>` : ''}`;
+    layer.bindTooltip(labelHtml, { permanent: true, direction: 'center', className: 'suburb-label' });
+
+    layer.on('click', () => openPanel(row));
+    layer.on('mouseover', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.45 }));
+    layer.on('mouseout', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.25 }));
+
+    layer.addTo(suburbLayerGroup);
+    layersById[row.id] = layer;
+  });
+}
+
+// ---------- Panel ----------
+function openPanel(row){
+  currentSuburb = JSON.parse(JSON.stringify(row));
+  panelEmpty.style.display = 'none';
+
+  const details = currentSuburb.details || {};
+  const topLocs = currentSuburb.top_locations || [];
+  const tags = currentSuburb.tags || [];
+  const rating = currentSuburb.rating || 0;
+
+  const existingHeader = panel.querySelector('.panel-header');
+  const existingBody = panel.querySelector('.panel-body');
+  if (existingHeader) existingHeader.remove();
+  if (existingBody) existingBody.remove();
+
+  panel.insertAdjacentHTML('beforeend', `
+    <div class="panel-header">
+      <h2>${currentSuburb.name}</h2>
+      <input class="subline-input" id="f-subline" value="${escapeAttr(currentSuburb.subline || '')}" placeholder="Short descriptor, e.g. Trendy & Vibrant" />
+    </div>
+    <div class="panel-body">
+      <div class="field-label">About</div>
+      <textarea id="f-about" placeholder="What's this suburb like?">${currentSuburb.about || ''}</textarea>
+
+      <div class="field-label">Details</div>
+      <div class="grid-2">
+        <div><label>Region</label><input type="text" id="f-region" value="${escapeAttr(details.region || '')}"></div>
+        <div><label>Population</label><input type="text" id="f-population" value="${escapeAttr(details.population || '')}"></div>
+        <div><label>Best for</label><input type="text" id="f-bestfor" value="${escapeAttr(details.best_for || '')}"></div>
+        <div><label>Vibe</label><input type="text" id="f-vibe" value="${escapeAttr(details.vibe || '')}"></div>
+      </div>
+
+      <div class="field-label">My rating</div>
+      <div class="stars" id="f-stars">
+        ${[1,2,3,4,5].map(n => `<span class="star ${n <= rating ? 'filled' : ''}" data-val="${n}">★</span>`).join('')}
+      </div>
+
+      <div class="field-label">Tags</div>
+      <input type="text" id="f-tags" value="${escapeAttr(tags.join(', '))}" placeholder="comma, separated, tags">
+
+      <div class="field-label">Top locations</div>
+      <div id="f-toplocs">
+        ${topLocs.map((t, i) => topLocRow(t, i)).join('')}
+      </div>
+      <div class="add-btn" id="add-toploc">+ add a location</div>
+
+      <div class="field-label">Notes</div>
+      <textarea id="f-notes" placeholder="Personal notes — practical tips, reminders…">${currentSuburb.notes || ''}</textarea>
+
+      <button class="save-btn" id="saveBtn" ${configured ? '' : 'disabled'}>Save</button>
+      <div class="save-flash" id="saveFlash"></div>
+    </div>
+  `);
+
+  let selectedRating = rating;
+  panel.querySelectorAll('#f-stars .star').forEach(star => {
+    star.addEventListener('click', () => {
+      selectedRating = Number(star.dataset.val);
+      panel.querySelectorAll('#f-stars .star').forEach(s => {
+        s.classList.toggle('filled', Number(s.dataset.val) <= selectedRating);
+      });
+    });
+  });
+
+  document.getElementById('add-toploc').addEventListener('click', () => {
+    const container = document.getElementById('f-toplocs');
+    const idx = container.children.length;
+    container.insertAdjacentHTML('beforeend', topLocRow({ name: '', description: '' }, idx));
+    bindRemoveButtons();
+  });
+  bindRemoveButtons();
+
+  document.getElementById('saveBtn').addEventListener('click', () => saveSuburb(selectedRating));
+}
+
+function topLocRow(t, i){
+  return `
+    <div class="top-loc-item" data-idx="${i}">
+      <span class="remove-btn">remove</span>
+      <input type="text" class="tl-name" placeholder="Name" value="${escapeAttr(t.name || '')}">
+      <input type="text" class="tl-desc" placeholder="One-line description" value="${escapeAttr(t.description || '')}">
+    </div>
+  `;
+}
+
+function bindRemoveButtons(){
+  panel.querySelectorAll('.top-loc-item .remove-btn').forEach(btn => {
+    btn.onclick = () => btn.closest('.top-loc-item').remove();
+  });
+}
+
+function escapeAttr(str){
+  return String(str).replace(/"/g, '&quot;');
+}
+
+async function saveSuburb(rating){
+  if (!configured || !currentSuburb) return;
+  const saveBtn = document.getElementById('saveBtn');
+  const flash = document.getElementById('saveFlash');
+  saveBtn.disabled = true;
+  flash.textContent = 'Saving…';
+
+  const topLocs = Array.from(document.querySelectorAll('#f-toplocs .top-loc-item')).map(el => ({
+    name: el.querySelector('.tl-name').value,
+    description: el.querySelector('.tl-desc').value
+  })).filter(t => t.name);
+
+  const payload = {
+    subline: document.getElementById('f-subline').value,
+    about: document.getElementById('f-about').value,
+    details: {
+      region: document.getElementById('f-region').value,
+      population: document.getElementById('f-population').value,
+      best_for: document.getElementById('f-bestfor').value,
+      vibe: document.getElementById('f-vibe').value
+    },
+    rating: rating || null,
+    tags: document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+    top_locations: topLocs,
+    notes: document.getElementById('f-notes').value,
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await sb.from('suburbs').update(payload).eq('id', currentSuburb.id).select();
+  saveBtn.disabled = false;
+
+  if (error) {
+    console.error(error);
+    flash.textContent = 'Save failed — see console.';
+    return;
+  }
+
+  flash.textContent = 'Saved.';
+  setTimeout(() => { flash.textContent = ''; }, 2000);
+
+  const updatedRow = data[0];
+  const layer = layersById[updatedRow.id];
+  if (layer) {
+    const labelHtml = `<div class="name">${updatedRow.name}</div>${updatedRow.subline ? `<div class="sub">${updatedRow.subline}</div>` : ''}`;
+    layer.unbindTooltip();
+    layer.bindTooltip(labelHtml, { permanent: true, direction: 'center', className: 'suburb-label' });
+  }
+}
+</script>
+</body>
+</html>
