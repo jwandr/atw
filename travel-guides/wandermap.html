@@ -618,8 +618,8 @@ node["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${eas
 
 geojson.features.forEach(f => {
   const name =
-    f.properties?.name ||
-    f.properties?.tags?.name;
+    f.properties &&
+    (f.properties.name || (f.properties.tags && f.properties.tags.name));
 
   if (!name || !f.geometry) return;
 
@@ -627,16 +627,18 @@ geojson.features.forEach(f => {
     f.geometry.type === 'Polygon' ||
     f.geometry.type === 'MultiPolygon';
 
-  if (!byName[name]) {
+  const existing = byName[name];
+
+  if (!existing) {
     byName[name] = f;
     return;
   }
 
   const existingIsPolygon =
-    byName[name].geometry.type === 'Polygon' ||
-    byName[name].geometry.type === 'MultiPolygon';
+    existing.geometry.type === 'Polygon' ||
+    existing.geometry.type === 'MultiPolygon';
 
-  // Replace point with polygon
+  // Prefer boundary polygons over point labels
   if (isPolygon && !existingIsPolygon) {
     byName[name] = f;
   }
@@ -645,29 +647,34 @@ geojson.features.forEach(f => {
 
 const toInsert = [];
 
-Object.values(byName).forEach(f => {
-    const name = f.properties && (f.properties.name || (f.properties.tags && f.properties.tags.name));
-    if (!name || seen.has(name)) return;
-    if (!f.geometry) return;
-    seen.add(name);
-    toInsert.push({
-      osm_id: f.id ? Number(String(f.id).replace(/\D/g, '')) || null : null,
-      osm_type: f.type === 'relation' ? 'relation' :
-          f.type === 'way' ? 'way' :
-          f.type === 'node' ? 'node' :
-          null,
-      city: cityName,
-      country: countryName || null,
-      name: name,
-      subline: '',
-      color: COLORS[toInsert.length % COLORS.length],
-      boundary: f.geometry,
-      details: {},
-      top_locations: [],
-      tags: []
-    });
-  });
+Object.values(byName).forEach((f, i) => {
 
+  const name =
+    f.properties &&
+    (f.properties.name || (f.properties.tags && f.properties.tags.name));
+
+  if (!name || !f.geometry) return;
+
+  toInsert.push({
+    osm_id: f.id ? Number(String(f.id).replace(/\D/g, '')) || null : null,
+
+    // Temporary — we will improve this after confirming OSM output
+    osm_type: f.geometry.type,
+
+    city: cityName,
+    country: countryName || null,
+
+    name: name,
+    subline: '',
+    color: COLORS[i % COLORS.length],
+
+    boundary: f.geometry,
+
+    details: {},
+    top_locations: [],
+    tags: []
+  });
+});
   if (toInsert.length === 0) return [];
 
   const { data, error } = await sb.from('suburbs').upsert(toInsert, { onConflict: 'osm_type,osm_id' }).select();
