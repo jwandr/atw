@@ -463,7 +463,7 @@ document.getElementById('flyToInput').addEventListener('keydown', async (e) => {
 // MAP MODE — loads only curated places, no searching required
 // =======================================================================
 railMap.addEventListener('click', () => {
-  if (viewMode === 'curate') clearCurateLayers();
+  if (viewMode === 'curate') { clearCurateLayers(); curateCity = null; }
   viewMode = 'map';
   setRailActive('map');
   closePanel();
@@ -531,7 +531,7 @@ function renderPlaces(rows){
 // CATALOGUE MODE — list cities, add new ones
 // =======================================================================
 railCatalogue.addEventListener('click', () => {
-  if (viewMode === 'curate') clearCurateLayers();
+  if (viewMode === 'curate') { clearCurateLayers(); curateCity = null; }
   viewMode = 'catalogue';
   setRailActive('catalogue');
   breadcrumb.textContent = 'Catalogue';
@@ -656,9 +656,9 @@ let curateCandidates = [];
 
 async function enterCurateMode(city){
   viewMode = 'curate';
+  clearCurateLayers();
   curateCity = city;
   setRailActive('catalogue');
-  clearCurateLayers();
 
   panel.innerHTML = `
     <div class="panel-topbar">
@@ -676,6 +676,7 @@ async function enterCurateMode(city){
   `;
   document.getElementById('closeCuratePanel').addEventListener('click', () => {
     clearCurateLayers();
+    curateCity = null;
     viewMode = 'catalogue';
     openCataloguePanel();
   });
@@ -782,7 +783,6 @@ function centroidOf(geometry){
 function clearCurateLayers(){
   curateCandidates.forEach(c => { if (c.layer) placeLayerGroup.removeLayer(c.layer); });
   curateCandidates = [];
-  curateCity = null;
 }
 
 function styleFor(candidate){
