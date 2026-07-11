@@ -593,15 +593,12 @@ console.log("FETCHING OSM", cityName);
   // whether it's drawn as a polygon or only pinned as a point.
   const query = `[out:json][timeout:25];
     (
-      way["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
-relation["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
+  way["boundary"="administrative"]["admin_level"="9"](${south},${west},${north},${east});
+  relation["boundary"="administrative"]["admin_level"="9"](${south},${west},${north},${east});
 
-way["boundary"="administrative"]["name"](${south},${west},${north},${east});
-relation["boundary"="administrative"]["name"](${south},${west},${north},${east});
-
-node["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
-    );
-    out geom;`;
+  node["place"~"^(suburb|neighbourhood|quarter|locality)$"](${south},${west},${north},${east});
+);
+out geom;`;
 
   const res = await fetch('https://overpass-api.de/api/interpreter', {
     method: 'POST',
@@ -618,63 +615,62 @@ node["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${eas
   const byName = {};
 
 geojson.features.forEach(f => {
-const tags = f.properties || {};
 
-console.log(
-  f.properties.name,
-  f.properties.place,
-  f.properties.boundary,
-  f.properties.admin_level
-);
+  const tags = f.properties || {};
 
-const isPolygon =
-  f.geometry.type === 'Polygon' ||
-  f.geometry.type === 'MultiPolygon';
+  console.log(
+    tags.name,
+    tags.place,
+    tags.boundary,
+    tags.admin_level
+  );
 
-if (!isPolygon) {
-  return;
-}
+  if (!f.geometry) return;
 
-// Only accept real suburb-style boundaries
-const isWantedPlace =
-  tags.place === 'suburb' ||
-  tags.place === 'neighbourhood' ||
-  tags.place === 'quarter' ||
-  tags.place === 'locality';
+  const isPolygon =
+    f.geometry.type === "Polygon" ||
+    f.geometry.type === "MultiPolygon";
 
-if (!isWantedPlace) {
-  return;
-}
+  const isPoint =
+    f.geometry.type === "Point";
 
-// Reject administrative areas like councils
-if (
-  tags.boundary === 'administrative' &&
-  tags.admin_level &&
-  Number(tags.admin_level) < 9
-) {
-  return;
-}  const name =
-    f.properties &&
-    (f.properties.name || (f.properties.tags && f.properties.tags.name));
+  const isSuburbPolygon =
+    isPolygon &&
+    tags.boundary === "administrative" &&
+    Number(tags.admin_level) === 9;
 
-  if (!name || !f.geometry) return;
+  const isSuburbPoint =
+    isPoint &&
+    (
+      tags.place === "suburb" ||
+      tags.place === "neighbourhood" ||
+      tags.place === "quarter" ||
+      tags.place === "locality"
+    );
 
-  const key = `${name}-${tags.city || ''}`;
-  const existing = byName[key];
+  if (!isSuburbPolygon && !isSuburbPoint) {
+    return;
+  }
+
+  const name = tags.name;
+
+  if (!name) return;
+
+  const existing = byName[name];
 
   if (!existing) {
-    byName[key] = f;
+    byName[name] = f;
     return;
   }
 
   const existingIsPolygon =
-    existing.geometry.type === 'Polygon' ||
-    existing.geometry.type === 'MultiPolygon';
+    existing.geometry.type === "Polygon" ||
+    existing.geometry.type === "MultiPolygon";
 
-  // Prefer boundary polygons over point labels
   if (isPolygon && !existingIsPolygon) {
-    byName[key] = f;
+    byName[name] = f;
   }
+
 });
 
 
