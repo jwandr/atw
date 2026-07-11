@@ -113,28 +113,15 @@
 
   /* Right panel */
   .panel{
-    width:420px;
-    flex-shrink:0;
+    width:50%;
+    flex:0 0 50%;
     border-left:1px solid var(--line);
     background: var(--bg);
-    display:flex;
+    display:none;
     flex-direction:column;
     overflow-y:auto;
   }
-  .panel-empty{
-    padding:40px 24px;
-    color: var(--ink-soft);
-    font-size:13.5px;
-    line-height:1.6;
-  }
-  .panel-header{
-    padding:22px 22px 14px;
-    border-bottom:1px solid var(--line);
-  }
-  .panel-header h2{
-    margin:0 0 4px;
-    font-size:22px;
-  }
+  .panel-empty{ display:none; }
   .subline-input{
     border:none;
     border-bottom:1px dashed var(--line);
@@ -314,45 +301,52 @@
     cursor:pointer;
   }
 
-  /* Editorial (view) mode */
-  .hero-banner{
+  /* Editorial (view) mode — two column header */
+  .header-section{
+    display:flex;
+    gap:20px;
+    align-items:flex-start;
+    padding:22px 22px 6px;
+  }
+  .header-left{ flex:1; min-width:0; }
+  .header-right{ width:42%; flex-shrink:0; }
+  .hero-box{
     width:100%;
-    height:190px;
+    aspect-ratio: 4 / 3;
+    border-radius:12px;
     background-size:cover;
     background-position:center;
-    position:relative;
-    flex-shrink:0;
-  }
-  .hero-banner.placeholder{
+    overflow:hidden;
     display:flex;
     align-items:center;
     justify-content:center;
-    color:rgba(255,255,255,0.85);
-    font-size:12.5px;
+  }
+  .hero-box.placeholder{
+    color:rgba(255,255,255,0.9);
+    font-size:12px;
     font-weight:600;
+    text-align:center;
+    padding:14px;
   }
-  .article-head{
-    padding:20px 22px 4px;
-  }
-  .article-head h2{
+  .header-left h2{
     margin:0 0 4px;
-    font-size:26px;
+    font-size:25px;
     letter-spacing:-0.01em;
   }
   .article-subline{
     color: var(--teal-dark);
     font-weight:700;
     font-size:14px;
-    margin-bottom:2px;
+    margin-bottom:8px;
   }
   .article-body{
-    padding: 6px 22px 40px;
+    padding: 10px 22px 40px;
   }
   .article-about{
-    font-size:15px;
-    line-height:1.65;
+    font-size:14.5px;
+    line-height:1.6;
     color: var(--ink);
-    margin: 10px 0 20px;
+    margin: 0;
   }
   .stat-strip{
     display:grid;
@@ -418,15 +412,6 @@
     font-style:italic;
   }
   .hero-url-row{ display:flex; gap:8px; align-items:center; margin-bottom:4px; }
-  .hero-preview{
-    width:100%;
-    height:90px;
-    border-radius:8px;
-    background-size:cover;
-    background-position:center;
-    border:1px solid var(--line);
-    margin-top:8px;
-  }
 </style>
 </head>
 <body>
@@ -449,11 +434,7 @@
 
   <div class="content">
     <div id="map"></div>
-    <div class="panel" id="panel">
-      <div class="panel-empty" id="panelEmpty">
-        Click any suburb outline once it's loaded on the map — you'll be able to add a description, top spots, tags, a rating, and notes here. It all saves to Supabase, so it'll be there next time.
-      </div>
-    </div>
+    <div class="panel" id="panel"></div>
   </div>
 </div>
 
@@ -473,7 +454,7 @@ let sb = null;
 if (configured) {
   sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } else {
-  document.getElementById('panelEmpty').insertAdjacentHTML('beforebegin', `
+  document.getElementById('breadcrumb').insertAdjacentHTML('afterend', `
     <div class="config-warning">
       <strong>Not connected yet.</strong><br>
       Add your Supabase project URL and anon key at the top of the script
@@ -483,7 +464,7 @@ if (configured) {
   `);
 }
 
-const COLORS = ['#12B8A0', '#F59E0B', '#8B5CF6', '#3B82F6', '#10D97A', '#EC4899', '#FB7A3C', '#06B6D4'];
+const COLORS = ['#2DD4BF', '#FBBF24', '#A78BFA', '#60A5FA', '#4ADE80', '#F472B6', '#FB923C', '#22D3EE'];
 
 const map = L.map('map', { zoomControl: true }).setView([-31.95, 115.86], 12);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -497,7 +478,6 @@ let currentSuburb = null;
 
 const statusMsg = document.getElementById('statusMsg');
 const breadcrumb = document.getElementById('breadcrumb');
-const panelEmpty = document.getElementById('panelEmpty');
 const panel = document.getElementById('panel');
 
 function setStatus(msg){ statusMsg.textContent = msg || ''; }
@@ -626,11 +606,11 @@ function renderSuburbs(rows){
     let layer;
     if (row.boundary.type === 'Point') {
       layer = L.circleMarker([row.boundary.coordinates[1], row.boundary.coordinates[0]], {
-        radius: 8, color: color, fillColor: color, fillOpacity: 0.6, weight: 2
+        radius: 8, color: color, fillColor: color, fillOpacity: 0.65, weight: 2
       });
     } else {
       layer = L.geoJSON(feature, {
-        style: { color: color, weight: 2, fillColor: color, fillOpacity: 0.32 }
+        style: { color: color, weight: 2, fillColor: color, fillOpacity: 0.4 }
       });
     }
 
@@ -638,8 +618,8 @@ function renderSuburbs(rows){
     layer.bindTooltip(labelHtml, { permanent: true, direction: 'center', className: 'suburb-label' });
 
     layer.on('click', () => openPanel(row));
-    layer.on('mouseover', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.5 }));
-    layer.on('mouseout', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.32 }));
+    layer.on('mouseover', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.58 }));
+    layer.on('mouseout', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.4 }));
 
     layer.addTo(suburbLayerGroup);
     layersById[row.id] = layer;
@@ -652,13 +632,14 @@ let currentMode = 'view';
 function openPanel(row){
   currentSuburb = JSON.parse(JSON.stringify(row));
   currentMode = currentSuburb.about ? 'view' : 'edit';
-  panelEmpty.style.display = 'none';
+  panel.style.display = 'flex';
   renderPanel();
+  setTimeout(() => map.invalidateSize(), 0);
 }
 
 function renderPanel(){
   const existingTop = panel.querySelector('.panel-topbar');
-  const existingRest = panel.querySelectorAll('.hero-banner, .article-head, .article-body, .panel-header, .panel-body');
+  const existingRest = panel.querySelectorAll('.header-section, .article-body, .panel-body');
   if (existingTop) existingTop.remove();
   existingRest.forEach(el => el.remove());
 
@@ -681,9 +662,10 @@ function renderPanel(){
   }
 
   document.getElementById('closePanel').addEventListener('click', () => {
-    panel.querySelectorAll('.panel-topbar, .hero-banner, .article-head, .article-body, .panel-header, .panel-body').forEach(el => el.remove());
-    panelEmpty.style.display = 'block';
+    panel.querySelectorAll('.panel-topbar, .header-section, .article-body, .panel-body').forEach(el => el.remove());
+    panel.style.display = 'none';
     currentSuburb = null;
+    setTimeout(() => map.invalidateSize(), 0);
   });
 
   document.getElementById('modeSwitch').addEventListener('click', () => {
@@ -724,16 +706,19 @@ function renderEditorialView(){
   const rating = row.rating || 0;
 
   panel.insertAdjacentHTML('beforeend', `
-    <div class="hero-banner ${row.hero_image_url ? '' : 'placeholder'}" style="${heroStyleFor(row)}">
-      ${row.hero_image_url ? '' : 'No hero image yet — add one in edit mode'}
-    </div>
-    <div class="article-head">
-      <h2>${row.name}</h2>
-      ${row.subline ? `<div class="article-subline">${row.subline}</div>` : ''}
+    <div class="header-section">
+      <div class="header-left">
+        <h2>${row.name}</h2>
+        ${row.subline ? `<div class="article-subline">${row.subline}</div>` : ''}
+        ${row.about ? `<p class="article-about">${row.about}</p>` : '<p class="empty-hint">No description yet — switch to edit mode to add one.</p>'}
+      </div>
+      <div class="header-right">
+        <div class="hero-box ${row.hero_image_url ? '' : 'placeholder'}" style="${heroStyleFor(row)}">
+          ${row.hero_image_url ? '' : 'No hero image yet'}
+        </div>
+      </div>
     </div>
     <div class="article-body">
-      ${row.about ? `<p class="article-about">${row.about}</p>` : '<p class="empty-hint">No description yet — switch to edit mode to add one.</p>'}
-
       ${(details.region || details.population || details.best_for || details.vibe) ? `
       <div class="stat-strip">
         ${details.region ? `<div class="stat-box"><div class="k">Region</div><div class="v">${details.region}</div></div>` : ''}
@@ -767,21 +752,23 @@ function renderEditForm(){
   const rating = row.rating || 0;
 
   panel.insertAdjacentHTML('beforeend', `
-    <div class="panel-header">
-      <h2>${row.name}</h2>
-      <input class="subline-input" id="f-subline" value="${escapeAttr(row.subline || '')}" placeholder="Short descriptor, e.g. Trendy & Vibrant" />
+    <div class="header-section">
+      <div class="header-left">
+        <h2>${row.name}</h2>
+        <input class="subline-input" id="f-subline" value="${escapeAttr(row.subline || '')}" placeholder="Short descriptor, e.g. Trendy & Vibrant" />
+        <div class="field-label">About</div>
+        <textarea id="f-about" placeholder="What's this suburb like?">${row.about || ''}</textarea>
+      </div>
+      <div class="header-right">
+        <div class="field-label" style="margin-top:0;">Hero image URL</div>
+        <input type="text" id="f-hero" value="${escapeAttr(row.hero_image_url || '')}" placeholder="https://…" style="margin-bottom:8px;">
+        <div class="hero-box ${row.hero_image_url ? '' : 'placeholder'}" id="heroPreview" style="${heroStyleFor(row)}">
+          ${row.hero_image_url ? '' : 'Preview'}
+        </div>
+      </div>
     </div>
     <div class="panel-body">
-      <div class="field-label">Hero image URL</div>
-      <div class="hero-url-row">
-        <input type="text" id="f-hero" value="${escapeAttr(row.hero_image_url || '')}" placeholder="https://…">
-      </div>
-      <div class="hero-preview" id="heroPreview" style="${heroStyleFor(row)}"></div>
-
-      <div class="field-label">About</div>
-      <textarea id="f-about" placeholder="What's this suburb like?">${row.about || ''}</textarea>
-
-      <div class="field-label">Details</div>
+      <div class="field-label" style="margin-top:0;">Details</div>
       <div class="grid-2">
         <div><label>Region</label><input type="text" id="f-region" value="${escapeAttr(details.region || '')}"></div>
         <div><label>Population</label><input type="text" id="f-population" value="${escapeAttr(details.population || '')}"></div>
@@ -825,8 +812,11 @@ function renderEditForm(){
     const preview = document.getElementById('heroPreview');
     if (e.target.value) {
       preview.classList.remove('placeholder');
+      preview.textContent = '';
       preview.style.background = `url('${e.target.value}') center/cover`;
     } else {
+      preview.classList.add('placeholder');
+      preview.textContent = 'Preview';
       preview.style.background = heroStyleFor({ color: row.color }).replace('background:', '');
     }
   });
