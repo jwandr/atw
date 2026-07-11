@@ -583,6 +583,7 @@ async function loadCitySuburbs(cityName, countryName, bbox){
 }
 
 async function fetchAndSeedFromOverpass(cityName, countryName, bbox){
+console.log("FETCHING OSM", cityName);
   const [south, north, west, east] = bbox;
   // Query for informal neighbourhood-level "place" tags directly, rather than
   // administrative boundaries — admin tiers (wards, freguesias, LGAs, etc.)
@@ -617,16 +618,26 @@ node["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${eas
   const byName = {};
 
 geojson.features.forEach(f => {
-  const tags = f.properties?.tags || {};
+const tags = f.properties || {};
+
+console.log(
+  f.properties.name,
+  f.properties.place,
+  f.properties.boundary,
+  f.properties.admin_level
+);
 
 const isWantedPlace =
   tags.place === 'suburb' ||
   tags.place === 'neighbourhood' ||
   tags.place === 'quarter';
 
-const isAdministrative = tags.boundary === 'administrative';
+const isAdministrative =
+  tags.boundary === 'administrative';
 
-// Reject administrative boundaries unless they are also a place
+const hasAdminLevel = !!tags.admin_level;
+
+// Remove councils, states, municipalities etc.
 if (isAdministrative && !isWantedPlace) {
   return;
 }
