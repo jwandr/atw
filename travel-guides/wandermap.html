@@ -8,10 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy: #12213B;
-    --navy-light: #1B2E4F;
-    --teal: #2F6B5E;
-    --teal-light: #E4F0ED;
+    --navy: #16204A;
+    --navy-light: #212C5C;
+    --teal: #12B8A0;
+    --teal-dark: #0E9683;
+    --teal-light: #D7FBF3;
+    --amber: #FFB020;
     --ink: #1C2430;
     --ink-soft: #5B6472;
     --line: #E4E7EC;
@@ -184,7 +186,7 @@
     cursor:pointer;
     color:#D8DCE3;
   }
-  .star.filled{ color:#F5B942; }
+  .star.filled{ color: var(--amber); }
   .tags-row{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
   .tag-chip{
     background: var(--teal-light);
@@ -269,6 +271,162 @@
     color:#3A4454;
     text-shadow:0 1px 2px rgba(255,255,255,0.85), 0 0 6px rgba(255,255,255,0.6);
   }
+
+  /* Panel header + mode toggle */
+  .panel-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 22px;
+    border-bottom:1px solid var(--line);
+  }
+  .mode-toggle{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12.5px;
+    color: var(--ink-soft);
+    font-weight:600;
+  }
+  .switch{
+    width:38px;height:22px;
+    border-radius:100px;
+    background:#D8DCE3;
+    position:relative;
+    cursor:pointer;
+    transition:background 0.15s;
+    flex-shrink:0;
+  }
+  .switch.on{ background: var(--teal); }
+  .switch .knob{
+    position:absolute;
+    top:2px;left:2px;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:white;
+    transition:left 0.15s;
+    box-shadow:0 1px 3px rgba(0,0,0,0.25);
+  }
+  .switch.on .knob{ left:18px; }
+  .close-panel{
+    font-size:13px;
+    color: var(--ink-soft);
+    cursor:pointer;
+  }
+
+  /* Editorial (view) mode */
+  .hero-banner{
+    width:100%;
+    height:190px;
+    background-size:cover;
+    background-position:center;
+    position:relative;
+    flex-shrink:0;
+  }
+  .hero-banner.placeholder{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:rgba(255,255,255,0.85);
+    font-size:12.5px;
+    font-weight:600;
+  }
+  .article-head{
+    padding:20px 22px 4px;
+  }
+  .article-head h2{
+    margin:0 0 4px;
+    font-size:26px;
+    letter-spacing:-0.01em;
+  }
+  .article-subline{
+    color: var(--teal-dark);
+    font-weight:700;
+    font-size:14px;
+    margin-bottom:2px;
+  }
+  .article-body{
+    padding: 6px 22px 40px;
+  }
+  .article-about{
+    font-size:15px;
+    line-height:1.65;
+    color: var(--ink);
+    margin: 10px 0 20px;
+  }
+  .stat-strip{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .stat-box{
+    background: var(--panel-bg);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 12px;
+  }
+  .stat-box .k{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color: var(--ink-soft);
+    margin-bottom:2px;
+  }
+  .stat-box .v{
+    font-size:13.5px;
+    font-weight:600;
+  }
+  .view-stars{ font-size:16px; color: var(--amber); margin-bottom:18px; }
+  .view-stars .empty{ color:#E1E4EA; }
+  .view-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:22px; }
+  .section-title{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    font-weight:700;
+    color: var(--ink);
+    margin: 4px 0 12px;
+    padding-bottom:8px;
+    border-bottom:2px solid var(--ink);
+  }
+  .loc-card-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:24px;
+  }
+  .loc-card{
+    background: var(--panel-bg);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:11px 12px;
+  }
+  .loc-card .name{ font-weight:700; font-size:13px; margin-bottom:3px; }
+  .loc-card .desc{ font-size:12px; color: var(--ink-soft); line-height:1.4; }
+  .note-aside{
+    background:#FFF9E9;
+    border-left:3px solid var(--amber);
+    padding:12px 14px;
+    font-size:13px;
+    line-height:1.55;
+    border-radius:0 6px 6px 0;
+  }
+  .empty-hint{
+    color: var(--ink-soft);
+    font-size:13px;
+    font-style:italic;
+  }
+  .hero-url-row{ display:flex; gap:8px; align-items:center; margin-bottom:4px; }
+  .hero-preview{
+    width:100%;
+    height:90px;
+    border-radius:8px;
+    background-size:cover;
+    background-position:center;
+    border:1px solid var(--line);
+    margin-top:8px;
+  }
 </style>
 </head>
 <body>
@@ -325,7 +483,7 @@ if (configured) {
   `);
 }
 
-const COLORS = ['#2F6B5E', '#97713F', '#6B4C7A', '#3D6B99', '#5C7A44', '#7A3B4A', '#8C6239', '#3E7A87'];
+const COLORS = ['#12B8A0', '#F59E0B', '#8B5CF6', '#3B82F6', '#10D97A', '#EC4899', '#FB7A3C', '#06B6D4'];
 
 const map = L.map('map', { zoomControl: true }).setView([-31.95, 115.86], 12);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -468,11 +626,11 @@ function renderSuburbs(rows){
     let layer;
     if (row.boundary.type === 'Point') {
       layer = L.circleMarker([row.boundary.coordinates[1], row.boundary.coordinates[0]], {
-        radius: 8, color: color, fillColor: color, fillOpacity: 0.5, weight: 2
+        radius: 8, color: color, fillColor: color, fillOpacity: 0.6, weight: 2
       });
     } else {
       layer = L.geoJSON(feature, {
-        style: { color: color, weight: 2, fillColor: color, fillOpacity: 0.25 }
+        style: { color: color, weight: 2, fillColor: color, fillOpacity: 0.32 }
       });
     }
 
@@ -480,8 +638,8 @@ function renderSuburbs(rows){
     layer.bindTooltip(labelHtml, { permanent: true, direction: 'center', className: 'suburb-label' });
 
     layer.on('click', () => openPanel(row));
-    layer.on('mouseover', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.45 }));
-    layer.on('mouseout', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.25 }));
+    layer.on('mouseover', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.5 }));
+    layer.on('mouseout', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.32 }));
 
     layer.addTo(suburbLayerGroup);
     layersById[row.id] = layer;
@@ -489,28 +647,139 @@ function renderSuburbs(rows){
 }
 
 // ---------- Panel ----------
+let currentMode = 'view';
+
 function openPanel(row){
   currentSuburb = JSON.parse(JSON.stringify(row));
+  currentMode = currentSuburb.about ? 'view' : 'edit';
   panelEmpty.style.display = 'none';
+  renderPanel();
+}
 
-  const details = currentSuburb.details || {};
-  const topLocs = currentSuburb.top_locations || [];
-  const tags = currentSuburb.tags || [];
-  const rating = currentSuburb.rating || 0;
+function renderPanel(){
+  const existingTop = panel.querySelector('.panel-topbar');
+  const existingRest = panel.querySelectorAll('.hero-banner, .article-head, .article-body, .panel-header, .panel-body');
+  if (existingTop) existingTop.remove();
+  existingRest.forEach(el => el.remove());
 
-  const existingHeader = panel.querySelector('.panel-header');
-  const existingBody = panel.querySelector('.panel-body');
-  if (existingHeader) existingHeader.remove();
-  if (existingBody) existingBody.remove();
+  panel.insertAdjacentHTML('beforeend', `
+    <div class="panel-topbar">
+      <div class="mode-toggle">
+        <span>Edit mode</span>
+        <div class="switch ${currentMode === 'edit' ? 'on' : ''}" id="modeSwitch">
+          <div class="knob"></div>
+        </div>
+      </div>
+      <div class="close-panel" id="closePanel">Close ✕</div>
+    </div>
+  `);
+
+  if (currentMode === 'edit') {
+    renderEditForm();
+  } else {
+    renderEditorialView();
+  }
+
+  document.getElementById('closePanel').addEventListener('click', () => {
+    panel.querySelectorAll('.panel-topbar, .hero-banner, .article-head, .article-body, .panel-header, .panel-body').forEach(el => el.remove());
+    panelEmpty.style.display = 'block';
+    currentSuburb = null;
+  });
+
+  document.getElementById('modeSwitch').addEventListener('click', () => {
+    if (currentMode === 'edit') {
+      collectFormValues(); // keep unsaved edits in memory when flipping to view
+      currentMode = 'view';
+    } else {
+      currentMode = 'edit';
+    }
+    renderPanel();
+  });
+}
+
+function heroStyleFor(row){
+  if (row.hero_image_url) {
+    return `background-image:url('${row.hero_image_url}')`;
+  }
+  const c = row.color || '#12B8A0';
+  return `background:linear-gradient(135deg, ${c}, ${shade(c, -25)})`;
+}
+
+function shade(hex, percent){
+  const num = parseInt(hex.replace('#',''), 16);
+  let r = (num >> 16) + percent;
+  let g = ((num >> 8) & 0x00FF) + percent;
+  let b = (num & 0x0000FF) + percent;
+  r = Math.max(Math.min(255, r), 0);
+  g = Math.max(Math.min(255, g), 0);
+  b = Math.max(Math.min(255, b), 0);
+  return '#' + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
+}
+
+function renderEditorialView(){
+  const row = currentSuburb;
+  const details = row.details || {};
+  const topLocs = row.top_locations || [];
+  const tags = row.tags || [];
+  const rating = row.rating || 0;
+
+  panel.insertAdjacentHTML('beforeend', `
+    <div class="hero-banner ${row.hero_image_url ? '' : 'placeholder'}" style="${heroStyleFor(row)}">
+      ${row.hero_image_url ? '' : 'No hero image yet — add one in edit mode'}
+    </div>
+    <div class="article-head">
+      <h2>${row.name}</h2>
+      ${row.subline ? `<div class="article-subline">${row.subline}</div>` : ''}
+    </div>
+    <div class="article-body">
+      ${row.about ? `<p class="article-about">${row.about}</p>` : '<p class="empty-hint">No description yet — switch to edit mode to add one.</p>'}
+
+      ${(details.region || details.population || details.best_for || details.vibe) ? `
+      <div class="stat-strip">
+        ${details.region ? `<div class="stat-box"><div class="k">Region</div><div class="v">${details.region}</div></div>` : ''}
+        ${details.population ? `<div class="stat-box"><div class="k">Population</div><div class="v">${details.population}</div></div>` : ''}
+        ${details.best_for ? `<div class="stat-box"><div class="k">Best for</div><div class="v">${details.best_for}</div></div>` : ''}
+        ${details.vibe ? `<div class="stat-box"><div class="k">Vibe</div><div class="v">${details.vibe}</div></div>` : ''}
+      </div>` : ''}
+
+      ${rating ? `<div class="view-stars">${'★'.repeat(rating)}<span class="empty">${'★'.repeat(5 - rating)}</span></div>` : ''}
+
+      ${tags.length ? `<div class="view-tags">${tags.map(t => `<span class="tag-chip">${t}</span>`).join('')}</div>` : ''}
+
+      ${topLocs.length ? `
+        <div class="section-title">Top locations</div>
+        <div class="loc-card-grid">
+          ${topLocs.map(t => `<div class="loc-card"><div class="name">${t.name}</div><div class="desc">${t.description || ''}</div></div>`).join('')}
+        </div>` : ''}
+
+      ${row.notes ? `
+        <div class="section-title">Notes</div>
+        <div class="note-aside">${row.notes}</div>` : ''}
+    </div>
+  `);
+}
+
+function renderEditForm(){
+  const row = currentSuburb;
+  const details = row.details || {};
+  const topLocs = row.top_locations || [];
+  const tags = row.tags || [];
+  const rating = row.rating || 0;
 
   panel.insertAdjacentHTML('beforeend', `
     <div class="panel-header">
-      <h2>${currentSuburb.name}</h2>
-      <input class="subline-input" id="f-subline" value="${escapeAttr(currentSuburb.subline || '')}" placeholder="Short descriptor, e.g. Trendy & Vibrant" />
+      <h2>${row.name}</h2>
+      <input class="subline-input" id="f-subline" value="${escapeAttr(row.subline || '')}" placeholder="Short descriptor, e.g. Trendy & Vibrant" />
     </div>
     <div class="panel-body">
+      <div class="field-label">Hero image URL</div>
+      <div class="hero-url-row">
+        <input type="text" id="f-hero" value="${escapeAttr(row.hero_image_url || '')}" placeholder="https://…">
+      </div>
+      <div class="hero-preview" id="heroPreview" style="${heroStyleFor(row)}"></div>
+
       <div class="field-label">About</div>
-      <textarea id="f-about" placeholder="What's this suburb like?">${currentSuburb.about || ''}</textarea>
+      <textarea id="f-about" placeholder="What's this suburb like?">${row.about || ''}</textarea>
 
       <div class="field-label">Details</div>
       <div class="grid-2">
@@ -535,21 +804,31 @@ function openPanel(row){
       <div class="add-btn" id="add-toploc">+ add a location</div>
 
       <div class="field-label">Notes</div>
-      <textarea id="f-notes" placeholder="Personal notes — practical tips, reminders…">${currentSuburb.notes || ''}</textarea>
+      <textarea id="f-notes" placeholder="Personal notes — practical tips, reminders…">${row.notes || ''}</textarea>
 
       <button class="save-btn" id="saveBtn" ${configured ? '' : 'disabled'}>Save</button>
       <div class="save-flash" id="saveFlash"></div>
     </div>
   `);
 
-  let selectedRating = rating;
+  panel.dataset.selectedRating = rating;
   panel.querySelectorAll('#f-stars .star').forEach(star => {
     star.addEventListener('click', () => {
-      selectedRating = Number(star.dataset.val);
+      panel.dataset.selectedRating = star.dataset.val;
       panel.querySelectorAll('#f-stars .star').forEach(s => {
-        s.classList.toggle('filled', Number(s.dataset.val) <= selectedRating);
+        s.classList.toggle('filled', Number(s.dataset.val) <= Number(star.dataset.val));
       });
     });
+  });
+
+  document.getElementById('f-hero').addEventListener('input', (e) => {
+    const preview = document.getElementById('heroPreview');
+    if (e.target.value) {
+      preview.classList.remove('placeholder');
+      preview.style.background = `url('${e.target.value}') center/cover`;
+    } else {
+      preview.style.background = heroStyleFor({ color: row.color }).replace('background:', '');
+    }
   });
 
   document.getElementById('add-toploc').addEventListener('click', () => {
@@ -560,7 +839,7 @@ function openPanel(row){
   });
   bindRemoveButtons();
 
-  document.getElementById('saveBtn').addEventListener('click', () => saveSuburb(selectedRating));
+  document.getElementById('saveBtn').addEventListener('click', saveSuburb);
 }
 
 function topLocRow(t, i){
@@ -583,31 +862,46 @@ function escapeAttr(str){
   return String(str).replace(/"/g, '&quot;');
 }
 
-async function saveSuburb(rating){
-  if (!configured || !currentSuburb) return;
-  const saveBtn = document.getElementById('saveBtn');
-  const flash = document.getElementById('saveFlash');
-  saveBtn.disabled = true;
-  flash.textContent = 'Saving…';
-
+function collectFormValues(){
+  if (!document.getElementById('f-subline')) return; // not in edit mode
   const topLocs = Array.from(document.querySelectorAll('#f-toplocs .top-loc-item')).map(el => ({
     name: el.querySelector('.tl-name').value,
     description: el.querySelector('.tl-desc').value
   })).filter(t => t.name);
 
+  currentSuburb.subline = document.getElementById('f-subline').value;
+  currentSuburb.hero_image_url = document.getElementById('f-hero').value || null;
+  currentSuburb.about = document.getElementById('f-about').value;
+  currentSuburb.details = {
+    region: document.getElementById('f-region').value,
+    population: document.getElementById('f-population').value,
+    best_for: document.getElementById('f-bestfor').value,
+    vibe: document.getElementById('f-vibe').value
+  };
+  currentSuburb.rating = Number(panel.dataset.selectedRating) || null;
+  currentSuburb.tags = document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  currentSuburb.top_locations = topLocs;
+  currentSuburb.notes = document.getElementById('f-notes').value;
+}
+
+async function saveSuburb(){
+  if (!configured || !currentSuburb) return;
+  collectFormValues();
+
+  const saveBtn = document.getElementById('saveBtn');
+  const flash = document.getElementById('saveFlash');
+  saveBtn.disabled = true;
+  flash.textContent = 'Saving…';
+
   const payload = {
-    subline: document.getElementById('f-subline').value,
-    about: document.getElementById('f-about').value,
-    details: {
-      region: document.getElementById('f-region').value,
-      population: document.getElementById('f-population').value,
-      best_for: document.getElementById('f-bestfor').value,
-      vibe: document.getElementById('f-vibe').value
-    },
-    rating: rating || null,
-    tags: document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean),
-    top_locations: topLocs,
-    notes: document.getElementById('f-notes').value,
+    subline: currentSuburb.subline,
+    hero_image_url: currentSuburb.hero_image_url,
+    about: currentSuburb.about,
+    details: currentSuburb.details,
+    rating: currentSuburb.rating,
+    tags: currentSuburb.tags,
+    top_locations: currentSuburb.top_locations,
+    notes: currentSuburb.notes,
     updated_at: new Date().toISOString()
   };
 
@@ -623,10 +917,10 @@ async function saveSuburb(rating){
   flash.textContent = 'Saved.';
   setTimeout(() => { flash.textContent = ''; }, 2000);
 
-  const updatedRow = data[0];
-  const layer = layersById[updatedRow.id];
+  currentSuburb = data[0];
+  const layer = layersById[currentSuburb.id];
   if (layer) {
-    const labelHtml = `<div class="name">${updatedRow.name}</div>${updatedRow.subline ? `<div class="sub">${updatedRow.subline}</div>` : ''}`;
+    const labelHtml = `<div class="name">${currentSuburb.name}</div>${currentSuburb.subline ? `<div class="sub">${currentSuburb.subline}</div>` : ''}`;
     layer.unbindTooltip();
     layer.bindTooltip(labelHtml, { permanent: true, direction: 'center', className: 'suburb-label' });
   }
