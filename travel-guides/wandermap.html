@@ -424,7 +424,7 @@
 <div class="rail">
   <div class="rail-logo">W</div>
   <div class="rail-btn active">Map</div>
-  <div class="rail-btn">Notes</div>
+  <div class="rail-btn">0.0.1</div>
 </div>
 
 <div class="main">
@@ -627,21 +627,33 @@ console.log(
   f.properties.admin_level
 );
 
+const isPolygon =
+  f.geometry.type === 'Polygon' ||
+  f.geometry.type === 'MultiPolygon';
+
+if (!isPolygon) {
+  return;
+}
+
+// Only accept real suburb-style boundaries
 const isWantedPlace =
   tags.place === 'suburb' ||
   tags.place === 'neighbourhood' ||
-  tags.place === 'quarter';
+  tags.place === 'quarter' ||
+  tags.place === 'locality';
 
-const isAdministrative =
-  tags.boundary === 'administrative';
-
-const hasAdminLevel = !!tags.admin_level;
-
-// Remove councils, states, municipalities etc.
-if (isAdministrative && !isWantedPlace) {
+if (!isWantedPlace) {
   return;
 }
-  const name =
+
+// Reject administrative areas like councils
+if (
+  tags.boundary === 'administrative' &&
+  tags.admin_level &&
+  Number(tags.admin_level) < 9
+) {
+  return;
+}  const name =
     f.properties &&
     (f.properties.name || (f.properties.tags && f.properties.tags.name));
 
@@ -651,10 +663,11 @@ if (isAdministrative && !isWantedPlace) {
     f.geometry.type === 'Polygon' ||
     f.geometry.type === 'MultiPolygon';
 
-  const existing = byName[name];
+  const key = `${name}-${tags.city || ''}`;
+  const existing = byName[key];
 
   if (!existing) {
-    byName[name] = f;
+    byName[key] = f;
     return;
   }
 
@@ -664,7 +677,7 @@ if (isAdministrative && !isWantedPlace) {
 
   // Prefer boundary polygons over point labels
   if (isPolygon && !existingIsPolygon) {
-    byName[name] = f;
+    byName[key] = f;
   }
 });
 
