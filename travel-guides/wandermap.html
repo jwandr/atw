@@ -659,10 +659,6 @@ if (
 
   if (!name || !f.geometry) return;
 
-  const isPolygon =
-    f.geometry.type === 'Polygon' ||
-    f.geometry.type === 'MultiPolygon';
-
   const key = `${name}-${tags.city || ''}`;
   const existing = byName[key];
 
