@@ -617,6 +617,19 @@ node["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${eas
   const byName = {};
 
 geojson.features.forEach(f => {
+  const tags = f.properties?.tags || {};
+
+const isWantedPlace =
+  tags.place === 'suburb' ||
+  tags.place === 'neighbourhood' ||
+  tags.place === 'quarter';
+
+const isAdministrative = tags.boundary === 'administrative';
+
+// Reject administrative boundaries unless they are also a place
+if (isAdministrative && !isWantedPlace) {
+  return;
+}
   const name =
     f.properties &&
     (f.properties.name || (f.properties.tags && f.properties.tags.name));
