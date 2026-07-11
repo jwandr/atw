@@ -19,6 +19,7 @@
     --line: #E4E7EC;
     --bg: #FFFFFF;
     --panel-bg: #FAFAFA;
+    --gray: #94A3B8;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;height:100%;}
@@ -29,7 +30,6 @@
     height:100vh;
     overflow:hidden;
   }
-  /* Left icon rail */
   .rail{
     width:64px;
     background: var(--navy);
@@ -47,16 +47,23 @@
     margin-bottom:24px;
   }
   .rail-btn{
-    width:40px;height:40px;border-radius:9px;
-    display:flex;align-items:center;justify-content:center;
+    width:44px;height:44px;border-radius:9px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
     color:#8FA0BE;
-    font-size:11px;
+    font-size:9.5px;
+    font-weight:600;
+    gap:3px;
     margin-bottom:6px;
-    cursor:default;
+    cursor:pointer;
+    user-select:none;
   }
+  .rail-btn .ico{ font-size:16px; }
   .rail-btn.active{ background: var(--navy-light); color:#fff; }
-
-  /* Main column */
+  .rail-version{
+    margin-top:auto;
+    color:#4C5A80;
+    font-size:9px;
+  }
   .main{
     flex:1;
     display:flex;
@@ -101,24 +108,23 @@
     color: var(--ink-soft);
     border-bottom:1px solid var(--line);
     flex-shrink:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
   }
   .breadcrumb strong{ color: var(--ink); }
-  .refresh-btn{
-    float:right;
+  .breadcrumb .action-link{
     color: var(--teal-dark);
     font-weight:600;
     font-size:12.5px;
     cursor:pointer;
   }
-
   .content{
     flex:1;
     display:flex;
     min-height:0;
   }
   #map{ flex:1; min-width:0; }
-
-  /* Right panel */
   .panel{
     width:50%;
     flex:0 0 50%;
@@ -128,7 +134,6 @@
     flex-direction:column;
     overflow-y:auto;
   }
-  .panel-empty{ display:none; }
   .subline-input{
     border:none;
     border-bottom:1px dashed var(--line);
@@ -181,7 +186,6 @@
     color:#D8DCE3;
   }
   .star.filled{ color: var(--amber); }
-  .tags-row{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
   .tag-chip{
     background: var(--teal-light);
     color: var(--teal);
@@ -241,203 +245,129 @@
     line-height:1.6;
     color:#6B5622;
   }
-  .config-warning code{
-    background:#00000010;
-    padding:1px 5px;
-    border-radius:4px;
+  .config-warning code{ background:#00000010; padding:1px 5px; border-radius:4px; }
+  .place-label{
+    background:transparent; border:none; box-shadow:none;
+    font-family:'Inter',sans-serif; text-align:center; pointer-events:none;
   }
-  .suburb-label{
-    background:transparent;
-    border:none;
-    box-shadow:none;
-    font-family:'Inter',sans-serif;
-    text-align:center;
-    pointer-events:none;
-  }
-  .suburb-label .name{
-    font-weight:700;
-    font-size:13px;
-    color:#1C2430;
+  .place-label .name{
+    font-weight:700; font-size:13px; color:#1C2430;
     text-shadow:0 1px 2px rgba(255,255,255,0.85), 0 0 6px rgba(255,255,255,0.6);
   }
-  .suburb-label .sub{
-    font-size:10.5px;
-    color:#3A4454;
+  .place-label .sub{
+    font-size:10.5px; color:#3A4454;
     text-shadow:0 1px 2px rgba(255,255,255,0.85), 0 0 6px rgba(255,255,255,0.6);
   }
-
-  /* Panel header + mode toggle */
+  .place-label.candidate .name{ font-weight:600; color:#5B6472; font-size:11.5px; }
   .panel-topbar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:14px 22px;
-    border-bottom:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 22px; border-bottom:1px solid var(--line);
   }
-  .mode-toggle{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-size:12.5px;
-    color: var(--ink-soft);
-    font-weight:600;
-  }
+  .mode-toggle{ display:flex; align-items:center; gap:8px; font-size:12.5px; color: var(--ink-soft); font-weight:600; }
   .switch{
-    width:38px;height:22px;
-    border-radius:100px;
-    background:#D8DCE3;
-    position:relative;
-    cursor:pointer;
-    transition:background 0.15s;
-    flex-shrink:0;
+    width:38px;height:22px; border-radius:100px; background:#D8DCE3;
+    position:relative; cursor:pointer; transition:background 0.15s; flex-shrink:0;
   }
   .switch.on{ background: var(--teal); }
   .switch .knob{
-    position:absolute;
-    top:2px;left:2px;
-    width:18px;height:18px;
-    border-radius:50%;
-    background:white;
-    transition:left 0.15s;
-    box-shadow:0 1px 3px rgba(0,0,0,0.25);
+    position:absolute; top:2px;left:2px; width:18px;height:18px; border-radius:50%;
+    background:white; transition:left 0.15s; box-shadow:0 1px 3px rgba(0,0,0,0.25);
   }
   .switch.on .knob{ left:18px; }
-  .close-panel{
-    font-size:13px;
-    color: var(--ink-soft);
-    cursor:pointer;
-  }
-
-  /* Editorial (view) mode — two column header */
-  .header-section{
-    display:flex;
-    gap:20px;
-    align-items:flex-start;
-  }
-  .header-left{ flex:1; min-width:0; padding: 20px;}
+  .close-panel{ font-size:13px; color: var(--ink-soft); cursor:pointer; }
+  .header-section{ display:flex; gap:20px; align-items:flex-start; }
+  .header-left{ flex:1; min-width:0; padding: 20px; }
   .header-right{ width:42%; flex-shrink:0; }
   .hero-box{
-    width:100%;
-    aspect-ratio: 4 / 3;
-    background-size:cover;
-    background-position:center;
-    overflow:hidden;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    width:100%; aspect-ratio: 4 / 3; background-size:cover; background-position:center;
+    overflow:hidden; display:flex; align-items:center; justify-content:center;
   }
-  .hero-box.placeholder{
-    color:rgba(255,255,255,0.9);
-    font-size:12px;
-    font-weight:600;
-    text-align:center;
-    padding:14px;
-  }
-  .header-left h2{
-    margin:0 0 4px;
-    font-size:25px;
-    letter-spacing:-0.01em;
-  }
-  .article-subline{
-    color: var(--teal-dark);
-    font-weight:700;
-    font-size:14px;
-    margin-bottom:8px;
-  }
-  .article-body{
-    padding: 10px 22px 40px;
-  }
-  .article-about{
-    font-size:14.5px;
-    line-height:1.6;
-    color: var(--ink);
-    margin: 0;
-  }
-  .stat-strip{
-    display:grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap:10px;
-    margin-bottom:20px;
-  }
-  .stat-box{
-    background: var(--panel-bg);
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:9px 12px;
-  }
-  .stat-box .k{
-    font-size:10.5px;
-    text-transform:uppercase;
-    letter-spacing:0.05em;
-    color: var(--ink-soft);
-    margin-bottom:2px;
-  }
-  .stat-box .v{
-    font-size:13.5px;
-    font-weight:600;
-  }
+  .hero-box.placeholder{ color:rgba(255,255,255,0.9); font-size:12px; font-weight:600; text-align:center; padding:14px; }
+  .header-left h2{ margin:0 0 4px; font-size:25px; letter-spacing:-0.01em; }
+  .article-subline{ color: var(--teal-dark); font-weight:700; font-size:14px; margin-bottom:8px; }
+  .article-body{ padding: 10px 22px 40px; }
+  .article-about{ font-size:14.5px; line-height:1.6; color: var(--ink); margin: 0; }
+  .stat-strip{ display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom:20px; }
+  .stat-box{ background: var(--panel-bg); border:1px solid var(--line); border-radius:8px; padding:9px 12px; }
+  .stat-box .k{ font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; color: var(--ink-soft); margin-bottom:2px; }
+  .stat-box .v{ font-size:13.5px; font-weight:600; }
   .view-stars{ font-size:16px; color: var(--amber); margin-bottom:18px; }
   .view-stars .empty{ color:#E1E4EA; }
   .view-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:22px; }
   .section-title{
-    font-size:12px;
-    text-transform:uppercase;
-    letter-spacing:0.08em;
-    font-weight:700;
-    color: var(--ink);
-    margin: 4px 0 12px;
-    padding-bottom:8px;
-    border-bottom:2px solid var(--ink);
+    font-size:12px; text-transform:uppercase; letter-spacing:0.08em; font-weight:700; color: var(--ink);
+    margin: 4px 0 12px; padding-bottom:8px; border-bottom:2px solid var(--ink);
   }
-  .loc-card-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-    margin-bottom:24px;
-  }
-  .loc-card{
-    background: var(--panel-bg);
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:11px 12px;
-  }
+  .loc-card-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:24px; }
+  .loc-card{ background: var(--panel-bg); border:1px solid var(--line); border-radius:8px; padding:11px 12px; }
   .loc-card .name{ font-weight:700; font-size:13px; margin-bottom:3px; }
   .loc-card .desc{ font-size:12px; color: var(--ink-soft); line-height:1.4; }
   .note-aside{
-    background:#FFF9E9;
-    border-left:3px solid var(--amber);
-    padding:12px 14px;
-    font-size:13px;
-    line-height:1.55;
-    border-radius:0 6px 6px 0;
+    background:#FFF9E9; border-left:3px solid var(--amber); padding:12px 14px;
+    font-size:13px; line-height:1.55; border-radius:0 6px 6px 0;
   }
-  .empty-hint{
-    color: var(--ink-soft);
-    font-size:13px;
-    font-style:italic;
+  .empty-hint{ color: var(--ink-soft); font-size:13px; font-style:italic; }
+  .cat-body{ padding:20px 22px 40px; }
+  .add-city-row{ display:flex; gap:8px; margin-bottom:22px; }
+  .add-city-row input{ flex:1; }
+  .add-city-row button{
+    background: var(--teal); color:white; border:none; border-radius:6px;
+    padding:0 16px; font-weight:600; font-size:13px; cursor:pointer; font-family:inherit;
   }
-  .hero-url-row{ display:flex; gap:8px; align-items:center; margin-bottom:4px; }
+  .add-city-row button:disabled{ opacity:0.5; cursor:default; }
+  .city-card{
+    border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+    margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .city-card .info .name{ font-weight:700; font-size:15px; }
+  .city-card .info .meta{ font-size:12px; color: var(--ink-soft); margin-top:2px; }
+  .city-card .actions{ display:flex; gap:8px; flex-shrink:0; }
+  .city-card .curate-btn{
+    background: var(--teal-light); color: var(--teal-dark); border:none; border-radius:6px;
+    padding:7px 12px; font-weight:600; font-size:12.5px; cursor:pointer; font-family:inherit;
+  }
+  .city-card .remove-btn{
+    background:none; border:none; color:#B24444; font-size:12px; cursor:pointer; font-family:inherit;
+  }
+  .cat-empty{ color: var(--ink-soft); font-size:13.5px; line-height:1.6; }
+  .curate-head{ padding:20px 22px 4px; }
+  .curate-head h2{ margin:0 0 4px; font-size:22px; }
+  .curate-head .meta{ font-size:13px; color: var(--ink-soft); }
+  .curate-filter{ padding:14px 22px 0; }
+  .curate-body{ padding:14px 22px 40px; }
+  .curate-item{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:9px 12px; border:1px solid var(--line); border-radius:8px; margin-bottom:6px;
+    cursor:pointer;
+  }
+  .curate-item.selected{ border-color: var(--teal); background: var(--teal-light); }
+  .curate-item .name{ font-size:13.5px; font-weight:600; }
+  .curate-item .type{ font-size:11px; color: var(--ink-soft); }
+  .curate-item .toggle-dot{
+    width:18px;height:18px;border-radius:50%;border:2px solid var(--gray); flex-shrink:0;
+  }
+  .curate-item.selected .toggle-dot{ background: var(--teal); border-color: var(--teal); }
 </style>
 </head>
 <body>
 
 <div class="rail">
   <div class="rail-logo">W</div>
-  <div class="rail-btn active">Map</div>
-  <div class="rail-btn">0.0.1</div>
+  <div class="rail-btn active" id="railMap"><span class="ico">🗺</span>Map</div>
+  <div class="rail-btn" id="railCatalogue"><span class="ico">📋</span>Catalogue</div>
+  <div class="rail-version">0.2.0</div>
 </div>
 
 <div class="main">
   <div class="topbar">
     <div class="search-box">
       <span class="icon">⌕</span>
-      <input id="searchInput" type="text" placeholder="Search for a city or suburb…" />
+      <input id="flyToInput" type="text" placeholder="Jump to a place on the map…" />
     </div>
     <div class="status-msg" id="statusMsg"></div>
   </div>
   <div class="breadcrumb">
-    <span id="breadcrumb">Search a city to begin.</span>
-    <span class="refresh-btn" id="refreshBtn" style="display:none;">↻ Refresh from OpenStreetMap</span>
+    <span id="breadcrumb">Loading your catalogue…</span>
   </div>
 
   <div class="content">
@@ -466,260 +396,113 @@ if (configured) {
     <div class="config-warning">
       <strong>Not connected yet.</strong><br>
       Add your Supabase project URL and anon key at the top of the script
-      (<code>SUPABASE_URL</code> / <code>SUPABASE_ANON_KEY</code>) — Settings → API
-      in your Supabase dashboard. Run <code>schema.sql</code> there first.
+      (<code>SUPABASE_URL</code> / <code>SUPABASE_ANON_KEY</code>) — Settings → API in your Supabase dashboard.
     </div>
   `);
 }
 
 const COLORS = ['#2DD4BF', '#FBBF24', '#A78BFA', '#60A5FA', '#4ADE80', '#F472B6', '#FB923C', '#22D3EE'];
+function colorForName(name){
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return COLORS[hash % COLORS.length];
+}
 
-const map = L.map('map', { zoomControl: true }).setView([-31.95, 115.86], 12);
+const map = L.map('map', { zoomControl: true }).setView([20, 20], 2);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO',
   maxZoom: 19
 }).addTo(map);
 
-let suburbLayerGroup = L.layerGroup().addTo(map);
+let placeLayerGroup = L.layerGroup().addTo(map);
 let layersById = {};
-let currentSuburb = null;
+let currentPlace = null;
 
 const statusMsg = document.getElementById('statusMsg');
 const breadcrumb = document.getElementById('breadcrumb');
-const refreshBtn = document.getElementById('refreshBtn');
 const panel = document.getElementById('panel');
+const railMap = document.getElementById('railMap');
+const railCatalogue = document.getElementById('railCatalogue');
 
-let currentCity = null, currentCountry = null, currentBbox = null;
+let viewMode = 'map'; // 'map' | 'catalogue' | 'curate'
 
 function setStatus(msg){ statusMsg.textContent = msg || ''; }
 
-refreshBtn.addEventListener('click', async () => {
-  if (!currentCity || !configured) return;
+function setRailActive(mode){
+  railMap.classList.toggle('active', mode === 'map');
+  railCatalogue.classList.toggle('active', mode === 'catalogue' || mode === 'curate');
+}
 
-  setStatus(`Refreshing ${currentCity} from OpenStreetMap…`);
+function closePanel(){
+  panel.style.display = 'none';
+  panel.innerHTML = '';
+  currentPlace = null;
+  setTimeout(() => map.invalidateSize(), 0);
+}
 
-  try {
-    const rows = await fetchAndSeedFromOverpass(
-      currentCity,
-      currentCountry,
-      currentBbox
-    );
-
-    renderSuburbs(rows);
-    setStatus(`${rows.length} suburb(s) refreshed.`);
-  } catch (err) {
-    console.error(err);
-    setStatus('OpenStreetMap refresh failed — see console.');
-  }
-});
-
-// ---------- Search ----------
-document.getElementById('searchInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') searchCity(e.target.value.trim());
-});
-
-async function searchCity(query){
+// ---------- Fly-to search (navigation only, no data writes) ----------
+document.getElementById('flyToInput').addEventListener('keydown', async (e) => {
+  if (e.key !== 'Enter') return;
+  const query = e.target.value.trim();
   if (!query) return;
   setStatus('Searching…');
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=1&q=${encodeURIComponent(query)}`);
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(query)}`);
     const results = await res.json();
     if (!results.length) { setStatus('No match found.'); return; }
-    const place = results[0];
-    const bbox = place.boundingbox.map(Number); // [south, north, west, east]
+    const bbox = results[0].boundingbox.map(Number);
     map.fitBounds([[bbox[0], bbox[2]], [bbox[1], bbox[3]]]);
-
-    const addr = place.address || {};
-    const cityName = addr.city || addr.town || addr.suburb || place.display_name.split(',')[0];
-    const stateName = addr.state || '';
-    const countryName = addr.country || '';
-    breadcrumb.innerHTML = `${[countryName, stateName, cityName].filter(Boolean).join(' <span style="color:#C4C9D2">›</span> ')}`;
-
-    currentCity = cityName;
-    currentCountry = countryName;
-    currentBbox = bbox;
-    refreshBtn.style.display = configured ? 'inline' : 'none';
-
-    await loadCitySuburbs(cityName, countryName, bbox);
+    setStatus('');
   } catch (err) {
     console.error(err);
     setStatus('Search failed — see console.');
   }
-}
+});
 
-// ---------- Load suburbs (Supabase first, Overpass fallback) ----------
-async function loadCitySuburbs(cityName, countryName, bbox){
-  suburbLayerGroup.clearLayers();
+// =======================================================================
+// MAP MODE — loads only curated places, no searching required
+// =======================================================================
+railMap.addEventListener('click', () => {
+  if (viewMode === 'curate') clearCurateLayers();
+  viewMode = 'map';
+  setRailActive('map');
+  closePanel();
+  loadCatalogueMap();
+});
+
+async function loadCatalogueMap(){
+  if (!configured) { setStatus('Connect Supabase to load your catalogue.'); return; }
+  placeLayerGroup.clearLayers();
   layersById = {};
+  setStatus('Loading your catalogue…');
 
-  if (!configured) {
-    setStatus('Connect Supabase to load/save suburbs.');
-    return;
-  }
+  const { data, error } = await sb
+    .from('city_places')
+    .select('featured, places(*), cities(name,country)');
 
-  setStatus('Loading suburbs…');
-  const { data: existing, error } = await sb.from('suburbs').select('*').eq('city', cityName);
   if (error) { console.error(error); setStatus('Supabase read failed — see console.'); return; }
 
-  if (existing && existing.length > 0) {
-    renderSuburbs(existing);
-    setStatus(`${existing.length} suburb(s) loaded from your library.`);
-    return;
-  }
+  const rows = (data || []).filter(r => r.places).map(r => r.places);
+  renderPlaces(rows);
 
-  setStatus('No suburbs saved yet — fetching boundaries from OpenStreetMap…');
-  try {
-    const rows = await fetchAndSeedFromOverpass(cityName, countryName, bbox);
-    if (rows.length === 0) {
-      setStatus('OSM has no suburb boundaries for this area yet. Try a bigger city, or add suburbs manually later.');
-      return;
-    }
-    renderSuburbs(rows);
-    setStatus(`${rows.length} suburb(s) found via OpenStreetMap and saved.`);
-  } catch (err) {
-    console.error(err);
-    setStatus('OpenStreetMap fetch failed — see console.');
+  const cityCount = new Set((data || []).map(r => r.cities && r.cities.name)).size;
+  breadcrumb.textContent = `Your catalogue — ${cityCount} ${cityCount === 1 ? 'city' : 'cities'}, ${rows.length} ${rows.length === 1 ? 'place' : 'places'}.`;
+  setStatus('');
+
+  if (rows.length > 0) {
+    const bounds = placeLayerGroup.getBounds();
+    if (bounds.isValid()) map.fitBounds(bounds.pad(0.4));
   }
 }
 
-async function fetchAndSeedFromOverpass(cityName, countryName, bbox){
-console.log("FETCHING OSM", cityName);
-  const [south, north, west, east] = bbox;
-  // Query for informal neighbourhood-level "place" tags directly, rather than
-  // administrative boundaries — admin tiers (wards, freguesias, LGAs, etc.)
-  // vary wildly in meaning by country and often don't match how people
-  // actually refer to neighbourhoods. place=suburb/neighbourhood/quarter is
-  // the convention OSM mappers use worldwide for that informal identity,
-  // whether it's drawn as a polygon or only pinned as a point.
-  const query = `[out:json][timeout:25];
-    (
-  way["boundary"="administrative"]["admin_level"="9"](${south},${west},${north},${east});
-  relation["boundary"="administrative"]["admin_level"="9"](${south},${west},${north},${east});
-
-  node["place"~"^(suburb|neighbourhood|quarter|locality)$"](${south},${west},${north},${east});
-);
-out geom;`;
-
-  const res = await fetch('https://overpass-api.de/api/interpreter', {
-    method: 'POST',
-    body: 'data=' + encodeURIComponent(query)
-  });
-  if (!res.ok) throw new Error(`Overpass ${res.status}`);
-  const osmData = await res.json();
-  const geojson = osmtogeojson(osmData);
-
-  // Prefer polygon geometries over point-only duplicates of the same name
-  const typeRank = { Polygon: 0, MultiPolygon: 0, Point: 1 };
-  geojson.features.sort((a, b) => (typeRank[a.geometry.type] ?? 2) - (typeRank[b.geometry.type] ?? 2));
-
-  const byName = {};
-
-geojson.features.forEach(f => {
-
-  const tags = f.properties || {};
-
-  console.log(
-    tags.name,
-    tags.place,
-    tags.boundary,
-    tags.admin_level
-  );
-
-  if (!f.geometry) return;
-
-  const isPolygon =
-    f.geometry.type === "Polygon" ||
-    f.geometry.type === "MultiPolygon";
-
-  const isPoint =
-    f.geometry.type === "Point";
-
-  const isSuburbPolygon =
-    isPolygon &&
-    tags.boundary === "administrative" &&
-    Number(tags.admin_level) === 9;
-
-  const isSuburbPoint =
-    isPoint &&
-    (
-      tags.place === "suburb" ||
-      tags.place === "neighbourhood" ||
-      tags.place === "quarter" ||
-      tags.place === "locality"
-    );
-
-  if (!isSuburbPolygon && !isSuburbPoint) {
-    return;
-  }
-
-  const name = tags.name;
-
-  if (!name) return;
-
-  const existing = byName[name];
-
-  if (!existing) {
-    byName[name] = f;
-    return;
-  }
-
-  const existingIsPolygon =
-    existing.geometry.type === "Polygon" ||
-    existing.geometry.type === "MultiPolygon";
-
-  if (isPolygon && !existingIsPolygon) {
-    byName[name] = f;
-  }
-
-});
-
-
-const toInsert = [];
-
-Object.values(byName).forEach((f, i) => {
-
-  const name =
-    f.properties &&
-    (f.properties.name || (f.properties.tags && f.properties.tags.name));
-
-  if (!name || !f.geometry) return;
-
-  toInsert.push({
-    osm_id: f.id ? Number(String(f.id).replace(/\D/g, '')) || null : null,
-
-    // Temporary — we will improve this after confirming OSM output
-    osm_type: f.geometry.type,
-
-    city: cityName,
-    country: countryName || null,
-
-    name: name,
-    subline: '',
-    color: COLORS[i % COLORS.length],
-
-    boundary: f.geometry,
-
-    details: {},
-    top_locations: [],
-    tags: []
-  });
-});
-  if (toInsert.length === 0) return [];
-
-  const { data, error } = await sb.from('suburbs').upsert(toInsert, { onConflict: 'osm_type,osm_id' }).select();
-  if (error) throw error;
-  return data;
-}
-
-// ---------- Render ----------
-function renderSuburbs(rows){
-  suburbLayerGroup.clearLayers();
+function renderPlaces(rows){
+  placeLayerGroup.clearLayers();
   layersById = {};
 
   rows.forEach(row => {
     if (!row.boundary) return;
     const feature = { type: 'Feature', properties: {}, geometry: row.boundary };
-    const color = row.color || '#2F6B5E';
+    const color = colorForName(row.name);
 
     let layer;
     if (row.boundary.type === 'Point') {
@@ -733,75 +516,422 @@ function renderSuburbs(rows){
     }
 
     const labelHtml = `<div class="name">${row.name}</div>${row.subline ? `<div class="sub">${row.subline}</div>` : ''}`;
-    layer.bindTooltip(labelHtml, { permanent: true, direction: 'center', className: 'suburb-label' });
+    layer.bindTooltip(labelHtml, { permanent: true, direction: 'center', className: 'place-label' });
 
-    layer.on('click', () => openPanel(row));
+    layer.on('click', () => openPlacePanel(row));
     layer.on('mouseover', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.58 }));
     layer.on('mouseout', () => layer.setStyle && layer.setStyle({ fillOpacity: 0.4 }));
 
-    layer.addTo(suburbLayerGroup);
+    layer.addTo(placeLayerGroup);
     layersById[row.id] = layer;
   });
 }
 
-// ---------- Panel ----------
+// =======================================================================
+// CATALOGUE MODE — list cities, add new ones
+// =======================================================================
+railCatalogue.addEventListener('click', () => {
+  if (viewMode === 'curate') clearCurateLayers();
+  viewMode = 'catalogue';
+  setRailActive('catalogue');
+  breadcrumb.textContent = 'Catalogue';
+  openCataloguePanel();
+});
+
+async function openCataloguePanel(){
+  panel.style.display = 'flex';
+  panel.innerHTML = `
+    <div class="panel-topbar">
+      <strong>Catalogue</strong>
+      <div class="close-panel" id="closeCatPanel">Close ✕</div>
+    </div>
+    <div class="cat-body">
+      <div class="add-city-row">
+        <input type="text" id="newCityInput" placeholder="Add a city, e.g. Adelaide, Australia">
+        <button id="addCityBtn" ${configured ? '' : 'disabled'}>Add</button>
+      </div>
+      <div id="cityList" class="cat-empty">Loading…</div>
+    </div>
+  `;
+  document.getElementById('closeCatPanel').addEventListener('click', () => {
+    viewMode = 'map';
+    setRailActive('map');
+    closePanel();
+    loadCatalogueMap();
+  });
+  document.getElementById('addCityBtn').addEventListener('click', addCityToCatalogue);
+  document.getElementById('newCityInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addCityToCatalogue();
+  });
+  setTimeout(() => map.invalidateSize(), 0);
+  await renderCityList();
+}
+
+async function renderCityList(){
+  const listEl = document.getElementById('cityList');
+  if (!configured) { listEl.innerHTML = '<div class="cat-empty">Connect Supabase first.</div>'; return; }
+
+  const { data: cities, error } = await sb.from('cities').select('*').order('name');
+  if (error) { console.error(error); listEl.innerHTML = '<div class="cat-empty">Failed to load — see console.</div>'; return; }
+
+  if (!cities || cities.length === 0) {
+    listEl.innerHTML = '<div class="cat-empty">No cities yet — add one above to start curating places.</div>';
+    return;
+  }
+
+  const { data: counts } = await sb.from('city_places').select('city_id');
+  const countByCity = {};
+  (counts || []).forEach(c => { countByCity[c.city_id] = (countByCity[c.city_id] || 0) + 1; });
+
+  listEl.innerHTML = cities.map(c => `
+    <div class="city-card" data-id="${c.id}">
+      <div class="info">
+        <div class="name">${c.name}</div>
+        <div class="meta">${c.country || ''} · ${countByCity[c.id] || 0} place${(countByCity[c.id] || 0) === 1 ? '' : 's'}</div>
+      </div>
+      <div class="actions">
+        <button class="curate-btn" data-id="${c.id}">Curate</button>
+        <button class="remove-btn" data-id="${c.id}">Remove</button>
+      </div>
+    </div>
+  `).join('');
+
+  listEl.querySelectorAll('.curate-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const city = cities.find(c => c.id === btn.dataset.id);
+      enterCurateMode(city);
+    });
+  });
+  listEl.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const city = cities.find(c => c.id === btn.dataset.id);
+      if (!confirm(`Remove ${city.name} from your catalogue? This unlinks its places (the place records themselves aren't deleted).`)) return;
+      const { error } = await sb.from('cities').delete().eq('id', city.id);
+      if (error) { console.error(error); alert('Failed to remove — see console.'); return; }
+      renderCityList();
+    });
+  });
+}
+
+async function addCityToCatalogue(){
+  const input = document.getElementById('newCityInput');
+  const query = input.value.trim();
+  if (!query || !configured) return;
+  const btn = document.getElementById('addCityBtn');
+  btn.disabled = true;
+  setStatus('Looking up city…');
+
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=1&q=${encodeURIComponent(query)}`);
+    const results = await res.json();
+    if (!results.length) { setStatus('No match found.'); btn.disabled = false; return; }
+    const place = results[0];
+    const addr = place.address || {};
+    const cityName = addr.city || addr.town || addr.village || place.display_name.split(',')[0];
+    const countryName = addr.country || '';
+
+    const { error } = await sb.from('cities').insert([{
+      name: cityName,
+      country: countryName || null,
+      latitude: Number(place.lat),
+      longitude: Number(place.lon)
+    }]);
+    if (error) { console.error(error); setStatus('Could not add city — see console.'); btn.disabled = false; return; }
+
+    input.value = '';
+    setStatus('');
+    await renderCityList();
+  } catch (err) {
+    console.error(err);
+    setStatus('Lookup failed — see console.');
+  }
+  btn.disabled = false;
+}
+
+// =======================================================================
+// CURATE MODE — pick which OSM candidates belong to a city
+// =======================================================================
+let curateCity = null;
+let curateCandidates = [];
+
+async function enterCurateMode(city){
+  viewMode = 'curate';
+  curateCity = city;
+  setRailActive('catalogue');
+  clearCurateLayers();
+
+  panel.innerHTML = `
+    <div class="panel-topbar">
+      <strong>Curating</strong>
+      <div class="close-panel" id="closeCuratePanel">Done ✕</div>
+    </div>
+    <div class="curate-head">
+      <h2>${city.name}</h2>
+      <div class="meta" id="curateMeta">Loading candidates from OpenStreetMap…</div>
+    </div>
+    <div class="curate-filter">
+      <input type="text" id="curateFilter" placeholder="Filter by name…">
+    </div>
+    <div class="curate-body" id="curateList"></div>
+  `;
+  document.getElementById('closeCuratePanel').addEventListener('click', () => {
+    clearCurateLayers();
+    viewMode = 'catalogue';
+    openCataloguePanel();
+  });
+  document.getElementById('curateFilter').addEventListener('input', (e) => renderCurateList(e.target.value));
+
+  setStatus(`Geocoding ${city.name}…`);
+  const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(city.name + (city.country ? ', ' + city.country : ''))}`);
+  const geoResults = await geoRes.json();
+  if (!geoResults.length) { setStatus('Could not geocode this city.'); return; }
+  const bbox = geoResults[0].boundingbox.map(Number);
+  map.fitBounds([[bbox[0], bbox[2]], [bbox[1], bbox[3]]]);
+
+  setStatus('Fetching candidate boundaries from OpenStreetMap…');
+  try {
+    const candidates = await fetchOverpassCandidates(bbox);
+    setStatus('Checking your existing selections…');
+    const { data: linked, error } = await sb.from('city_places').select('id, places(*)').eq('city_id', city.id);
+    if (error) console.error(error);
+
+    const linkedByRef = {};
+    (linked || []).forEach(l => {
+      if (!l.places) return;
+      linkedByRef[`${l.places.osm_type}/${l.places.osm_id}`] = { cityPlaceRowId: l.id, place: l.places };
+    });
+
+    curateCandidates = candidates.map(c => {
+      const match = linkedByRef[c.osmRef];
+      return {
+        ...c,
+        selected: !!match,
+        placeId: match ? match.place.id : null,
+        cityPlaceRowId: match ? match.cityPlaceRowId : null
+      };
+    });
+
+    renderCurateLayers();
+    renderCurateList();
+    setStatus('');
+    document.getElementById('curateMeta').textContent =
+      `${curateCandidates.length} candidates found · ${curateCandidates.filter(c => c.selected).length} selected`;
+  } catch (err) {
+    console.error(err);
+    setStatus('OpenStreetMap fetch failed — see console.');
+  }
+}
+
+async function fetchOverpassCandidates(bbox){
+  const [south, north, west, east] = bbox;
+  // Cast a wide net — admin boundaries at several levels PLUS informal place
+  // tags — since a human is curating, over-fetching is fine. This is what
+  // makes it work across countries with wildly different admin conventions.
+  const query = `[out:json][timeout:30];
+    (
+      way["boundary"="administrative"]["admin_level"~"^(7|8|9|10)$"](${south},${west},${north},${east});
+      relation["boundary"="administrative"]["admin_level"~"^(7|8|9|10)$"](${south},${west},${north},${east});
+      way["place"~"^(suburb|neighbourhood|quarter|locality)$"](${south},${west},${north},${east});
+      relation["place"~"^(suburb|neighbourhood|quarter|locality)$"](${south},${west},${north},${east});
+      node["place"~"^(suburb|neighbourhood|quarter|locality)$"](${south},${west},${north},${east});
+    );
+    out geom;`;
+
+  const res = await fetch('https://overpass-api.de/api/interpreter', {
+    method: 'POST',
+    body: 'data=' + encodeURIComponent(query)
+  });
+  if (!res.ok) throw new Error(`Overpass ${res.status}`);
+  const osmData = await res.json();
+  const geojson = osmtogeojson(osmData);
+
+  const typeRank = { Polygon: 0, MultiPolygon: 0, Point: 1 };
+  geojson.features.sort((a, b) => (typeRank[a.geometry.type] ?? 2) - (typeRank[b.geometry.type] ?? 2));
+
+  const byName = {};
+  geojson.features.forEach(f => {
+    if (!f.geometry) return;
+    const tags = (f.properties && f.properties.tags) || f.properties || {};
+    const name = tags.name;
+    if (!name) return;
+    const existing = byName[name];
+    const isPoly = f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon';
+    if (!existing) { byName[name] = { f, tags }; return; }
+    const existingIsPoly = existing.f.geometry.type === 'Polygon' || existing.f.geometry.type === 'MultiPolygon';
+    if (isPoly && !existingIsPoly) byName[name] = { f, tags };
+  });
+
+  return Object.values(byName).map(({ f, tags }) => {
+    const idNum = f.id ? Number(String(f.id).replace(/\D/g, '')) : null;
+    const osmType = (f.properties && f.properties.type) || (f.geometry.type === 'Point' ? 'node' : 'way');
+    const placeType = tags.place || (tags.boundary === 'administrative' ? 'district' : 'place');
+    return {
+      osmType, osmId: idNum, osmRef: `${osmType}/${idNum}`,
+      name: tags.name, placeType, geometry: f.geometry
+    };
+  }).filter(c => c.osmId);
+}
+
+function centroidOf(geometry){
+  if (geometry.type === 'Point') return { lat: geometry.coordinates[1], lng: geometry.coordinates[0] };
+  const layer = L.geoJSON({ type: 'Feature', geometry, properties: {} });
+  const c = layer.getBounds().getCenter();
+  return { lat: c.lat, lng: c.lng };
+}
+
+function clearCurateLayers(){
+  curateCandidates.forEach(c => { if (c.layer) placeLayerGroup.removeLayer(c.layer); });
+  curateCandidates = [];
+  curateCity = null;
+}
+
+function styleFor(candidate){
+  if (candidate.selected) {
+    const color = colorForName(candidate.name);
+    return { color, fillColor: color, weight: 2, fillOpacity: 0.45, dashArray: null };
+  }
+  return { color: '#94A3B8', fillColor: '#94A3B8', weight: 1.5, fillOpacity: 0.08, dashArray: '4,4' };
+}
+
+function renderCurateLayers(){
+  placeLayerGroup.clearLayers();
+  curateCandidates.forEach(candidate => {
+    const style = styleFor(candidate);
+    let layer;
+    if (candidate.geometry.type === 'Point') {
+      layer = L.circleMarker([candidate.geometry.coordinates[1], candidate.geometry.coordinates[0]], {
+        radius: candidate.selected ? 8 : 5, color: style.color, fillColor: style.fillColor,
+        fillOpacity: style.fillOpacity, weight: style.weight
+      });
+    } else {
+      layer = L.geoJSON({ type: 'Feature', properties: {}, geometry: candidate.geometry }, { style });
+    }
+    layer.bindTooltip(`${candidate.name} <span style="opacity:0.7">· ${candidate.placeType}</span>`, {
+      direction: 'center', className: `place-label ${candidate.selected ? '' : 'candidate'}`
+    });
+    layer.on('click', () => toggleCandidate(candidate));
+    layer.addTo(placeLayerGroup);
+    candidate.layer = layer;
+  });
+}
+
+function restyleCandidateLayer(candidate){
+  const style = styleFor(candidate);
+  if (candidate.layer.setStyle) candidate.layer.setStyle(style);
+  if (candidate.layer.setRadius) candidate.layer.setRadius(candidate.selected ? 8 : 5);
+  candidate.layer.unbindTooltip();
+  candidate.layer.bindTooltip(`${candidate.name} <span style="opacity:0.7">· ${candidate.placeType}</span>`, {
+    direction: 'center', className: `place-label ${candidate.selected ? '' : 'candidate'}`
+  });
+}
+
+async function toggleCandidate(candidate){
+  if (!configured) return;
+
+  if (candidate.selected) {
+    const { error } = await sb.from('city_places').delete().eq('id', candidate.cityPlaceRowId);
+    if (error) { console.error(error); alert('Failed to remove — see console.'); return; }
+    candidate.selected = false;
+    candidate.cityPlaceRowId = null;
+  } else {
+    const centroid = centroidOf(candidate.geometry);
+    const { data: placeData, error: placeErr } = await sb.from('places').upsert([{
+      osm_id: candidate.osmId,
+      osm_type: candidate.osmType,
+      name: candidate.name,
+      place_type: candidate.placeType,
+      boundary: candidate.geometry,
+      latitude: centroid.lat,
+      longitude: centroid.lng,
+      country: curateCity.country
+    }], { onConflict: 'osm_type,osm_id' }).select();
+    if (placeErr) { console.error(placeErr); alert('Failed to save place — see console.'); return; }
+
+    const placeId = placeData[0].id;
+    const { data: cpData, error: cpErr } = await sb.from('city_places').upsert([{
+      city_id: curateCity.id, place_id: placeId
+    }], { onConflict: 'city_id,place_id' }).select();
+    if (cpErr) { console.error(cpErr); alert('Failed to link place to city — see console.'); return; }
+
+    candidate.selected = true;
+    candidate.placeId = placeId;
+    candidate.cityPlaceRowId = cpData[0].id;
+  }
+
+  restyleCandidateLayer(candidate);
+  renderCurateList(document.getElementById('curateFilter') ? document.getElementById('curateFilter').value : '');
+  document.getElementById('curateMeta').textContent =
+    `${curateCandidates.length} candidates found · ${curateCandidates.filter(c => c.selected).length} selected`;
+}
+
+function renderCurateList(filterText){
+  const listEl = document.getElementById('curateList');
+  const filter = (filterText || '').toLowerCase();
+  const items = curateCandidates
+    .filter(c => !filter || c.name.toLowerCase().includes(filter))
+    .sort((a, b) => (b.selected - a.selected) || a.name.localeCompare(b.name));
+
+  listEl.innerHTML = items.map(c => `
+    <div class="curate-item ${c.selected ? 'selected' : ''}" data-ref="${c.osmRef}">
+      <div>
+        <div class="name">${c.name}</div>
+        <div class="type">${c.placeType}</div>
+      </div>
+      <div class="toggle-dot"></div>
+    </div>
+  `).join('') || '<div class="cat-empty">No matches.</div>';
+
+  listEl.querySelectorAll('.curate-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const candidate = curateCandidates.find(c => c.osmRef === el.dataset.ref);
+      if (candidate) toggleCandidate(candidate);
+    });
+  });
+}
+
+// =======================================================================
+// PLACE PANEL — view/edit for a single curated place
+// =======================================================================
 let currentMode = 'view';
 
-function openPanel(row){
-  currentSuburb = JSON.parse(JSON.stringify(row));
-  currentMode = currentSuburb.about ? 'view' : 'edit';
+function openPlacePanel(row){
+  currentPlace = JSON.parse(JSON.stringify(row));
+  currentMode = currentPlace.about ? 'view' : 'edit';
   panel.style.display = 'flex';
-  renderPanel();
+  renderPlacePanel();
   setTimeout(() => map.invalidateSize(), 0);
 }
 
-function renderPanel(){
-  const existingTop = panel.querySelector('.panel-topbar');
-  const existingRest = panel.querySelectorAll('.header-section, .article-body, .panel-body');
-  if (existingTop) existingTop.remove();
-  existingRest.forEach(el => el.remove());
-
-  panel.insertAdjacentHTML('beforeend', `
+function renderPlacePanel(){
+  panel.innerHTML = `
     <div class="panel-topbar">
       <div class="mode-toggle">
         <span>Edit mode</span>
-        <div class="switch ${currentMode === 'edit' ? 'on' : ''}" id="modeSwitch">
-          <div class="knob"></div>
-        </div>
+        <div class="switch ${currentMode === 'edit' ? 'on' : ''}" id="modeSwitch"><div class="knob"></div></div>
       </div>
-      <div class="close-panel" id="closePanel">Close ✕</div>
+      <div class="close-panel" id="closePlacePanel">Close ✕</div>
     </div>
-  `);
+  `;
 
-  if (currentMode === 'edit') {
-    renderEditForm();
-  } else {
-    renderEditorialView();
-  }
+  if (currentMode === 'edit') renderEditForm(); else renderEditorialView();
 
-  document.getElementById('closePanel').addEventListener('click', () => {
-    panel.querySelectorAll('.panel-topbar, .header-section, .article-body, .panel-body').forEach(el => el.remove());
-    panel.style.display = 'none';
-    currentSuburb = null;
-    setTimeout(() => map.invalidateSize(), 0);
+  document.getElementById('closePlacePanel').addEventListener('click', () => {
+    closePanel();
   });
-
   document.getElementById('modeSwitch').addEventListener('click', () => {
     if (currentMode === 'edit') {
-      collectFormValues(); // keep unsaved edits in memory when flipping to view
+      collectFormValues();
       currentMode = 'view';
     } else {
       currentMode = 'edit';
     }
-    renderPanel();
+    renderPlacePanel();
   });
 }
 
 function heroStyleFor(row){
-  if (row.hero_image_url) {
-    return `background-image:url('${row.hero_image_url}')`;
-  }
-  const c = row.color || '#12B8A0';
+  if (row.hero_image_url) return `background-image:url('${row.hero_image_url}')`;
+  const c = colorForName(row.name || 'place');
   return `background:linear-gradient(135deg, ${c}, ${shade(c, -25)})`;
 }
 
@@ -817,7 +947,7 @@ function shade(hex, percent){
 }
 
 function renderEditorialView(){
-  const row = currentSuburb;
+  const row = currentPlace;
   const details = row.details || {};
   const topLocs = row.top_locations || [];
   const tags = row.tags || [];
@@ -846,7 +976,6 @@ function renderEditorialView(){
       </div>` : ''}
 
       ${rating ? `<div class="view-stars">${'★'.repeat(rating)}<span class="empty">${'★'.repeat(5 - rating)}</span></div>` : ''}
-
       ${tags.length ? `<div class="view-tags">${tags.map(t => `<span class="tag-chip">${t}</span>`).join('')}</div>` : ''}
 
       ${topLocs.length ? `
@@ -855,15 +984,13 @@ function renderEditorialView(){
           ${topLocs.map(t => `<div class="loc-card"><div class="name">${t.name}</div><div class="desc">${t.description || ''}</div></div>`).join('')}
         </div>` : ''}
 
-      ${row.notes ? `
-        <div class="section-title">Notes</div>
-        <div class="note-aside">${row.notes}</div>` : ''}
+      ${row.notes ? `<div class="section-title">Notes</div><div class="note-aside">${row.notes}</div>` : ''}
     </div>
   `);
 }
 
 function renderEditForm(){
-  const row = currentSuburb;
+  const row = currentPlace;
   const details = row.details || {};
   const topLocs = row.top_locations || [];
   const tags = row.tags || [];
@@ -875,7 +1002,7 @@ function renderEditForm(){
         <h2>${row.name}</h2>
         <input class="subline-input" id="f-subline" value="${escapeAttr(row.subline || '')}" placeholder="Short descriptor, e.g. Trendy & Vibrant" />
         <div class="field-label">About</div>
-        <textarea id="f-about" placeholder="What's this suburb like?">${row.about || ''}</textarea>
+        <textarea id="f-about" placeholder="What's this place like?">${row.about || ''}</textarea>
       </div>
       <div class="header-right">
         <div class="field-label" style="margin-top:0;">Hero image URL</div>
@@ -903,9 +1030,7 @@ function renderEditForm(){
       <input type="text" id="f-tags" value="${escapeAttr(tags.join(', '))}" placeholder="comma, separated, tags">
 
       <div class="field-label">Top locations</div>
-      <div id="f-toplocs">
-        ${topLocs.map((t, i) => topLocRow(t, i)).join('')}
-      </div>
+      <div id="f-toplocs">${topLocs.map((t, i) => topLocRow(t, i)).join('')}</div>
       <div class="add-btn" id="add-toploc">+ add a location</div>
 
       <div class="field-label">Notes</div>
@@ -935,7 +1060,7 @@ function renderEditForm(){
     } else {
       preview.classList.add('placeholder');
       preview.textContent = 'Preview';
-      preview.style.background = heroStyleFor({ color: row.color }).replace('background:', '');
+      preview.style.background = heroStyleFor({ name: row.name }).replace('background:', '');
     }
   });
 
@@ -947,7 +1072,7 @@ function renderEditForm(){
   });
   bindRemoveButtons();
 
-  document.getElementById('saveBtn').addEventListener('click', saveSuburb);
+  document.getElementById('saveBtn').addEventListener('click', savePlace);
 }
 
 function topLocRow(t, i){
@@ -966,34 +1091,32 @@ function bindRemoveButtons(){
   });
 }
 
-function escapeAttr(str){
-  return String(str).replace(/"/g, '&quot;');
-}
+function escapeAttr(str){ return String(str).replace(/"/g, '&quot;'); }
 
 function collectFormValues(){
-  if (!document.getElementById('f-subline')) return; // not in edit mode
+  if (!document.getElementById('f-subline')) return;
   const topLocs = Array.from(document.querySelectorAll('#f-toplocs .top-loc-item')).map(el => ({
     name: el.querySelector('.tl-name').value,
     description: el.querySelector('.tl-desc').value
   })).filter(t => t.name);
 
-  currentSuburb.subline = document.getElementById('f-subline').value;
-  currentSuburb.hero_image_url = document.getElementById('f-hero').value || null;
-  currentSuburb.about = document.getElementById('f-about').value;
-  currentSuburb.details = {
+  currentPlace.subline = document.getElementById('f-subline').value;
+  currentPlace.hero_image_url = document.getElementById('f-hero').value || null;
+  currentPlace.about = document.getElementById('f-about').value;
+  currentPlace.details = {
     region: document.getElementById('f-region').value,
     population: document.getElementById('f-population').value,
     best_for: document.getElementById('f-bestfor').value,
     vibe: document.getElementById('f-vibe').value
   };
-  currentSuburb.rating = Number(panel.dataset.selectedRating) || null;
-  currentSuburb.tags = document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean);
-  currentSuburb.top_locations = topLocs;
-  currentSuburb.notes = document.getElementById('f-notes').value;
+  currentPlace.rating = Number(panel.dataset.selectedRating) || null;
+  currentPlace.tags = document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  currentPlace.top_locations = topLocs;
+  currentPlace.notes = document.getElementById('f-notes').value;
 }
 
-async function saveSuburb(){
-  if (!configured || !currentSuburb) return;
+async function savePlace(){
+  if (!configured || !currentPlace) return;
   collectFormValues();
 
   const saveBtn = document.getElementById('saveBtn');
@@ -1002,37 +1125,35 @@ async function saveSuburb(){
   flash.textContent = 'Saving…';
 
   const payload = {
-    subline: currentSuburb.subline,
-    hero_image_url: currentSuburb.hero_image_url,
-    about: currentSuburb.about,
-    details: currentSuburb.details,
-    rating: currentSuburb.rating,
-    tags: currentSuburb.tags,
-    top_locations: currentSuburb.top_locations,
-    notes: currentSuburb.notes,
-    updated_at: new Date().toISOString()
+    subline: currentPlace.subline,
+    hero_image_url: currentPlace.hero_image_url,
+    about: currentPlace.about,
+    details: currentPlace.details,
+    rating: currentPlace.rating,
+    tags: currentPlace.tags,
+    top_locations: currentPlace.top_locations,
+    notes: currentPlace.notes
   };
 
-  const { data, error } = await sb.from('suburbs').update(payload).eq('id', currentSuburb.id).select();
+  const { data, error } = await sb.from('places').update(payload).eq('id', currentPlace.id).select();
   saveBtn.disabled = false;
 
-  if (error) {
-    console.error(error);
-    flash.textContent = 'Save failed — see console.';
-    return;
-  }
+  if (error) { console.error(error); flash.textContent = 'Save failed — see console.'; return; }
 
   flash.textContent = 'Saved.';
   setTimeout(() => { flash.textContent = ''; }, 2000);
 
-  currentSuburb = data[0];
-  const layer = layersById[currentSuburb.id];
+  currentPlace = data[0];
+  const layer = layersById[currentPlace.id];
   if (layer) {
-    const labelHtml = `<div class="name">${currentSuburb.name}</div>${currentSuburb.subline ? `<div class="sub">${currentSuburb.subline}</div>` : ''}`;
+    const labelHtml = `<div class="name">${currentPlace.name}</div>${currentPlace.subline ? `<div class="sub">${currentPlace.subline}</div>` : ''}`;
     layer.unbindTooltip();
-    layer.bindTooltip(labelHtml, { permanent: true, direction: 'center', className: 'suburb-label' });
+    layer.bindTooltip(labelHtml, { permanent: true, direction: 'center', className: 'place-label' });
   }
 }
+
+// ---------- Init ----------
+loadCatalogueMap();
 </script>
 </body>
 </html>
