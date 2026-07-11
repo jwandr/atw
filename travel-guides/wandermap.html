@@ -103,6 +103,13 @@
     flex-shrink:0;
   }
   .breadcrumb strong{ color: var(--ink); }
+  .refresh-btn{
+    float:right;
+    color: var(--teal-dark);
+    font-weight:600;
+    font-size:12.5px;
+    cursor:pointer;
+  }
 
   .content{
     flex:1;
@@ -306,14 +313,12 @@
     display:flex;
     gap:20px;
     align-items:flex-start;
-    padding:22px 22px 6px;
   }
-  .header-left{ flex:1; min-width:0; }
+  .header-left{ flex:1; min-width:0; padding: 20px;}
   .header-right{ width:42%; flex-shrink:0; }
   .hero-box{
     width:100%;
     aspect-ratio: 4 / 3;
-    border-radius:12px;
     background-size:cover;
     background-position:center;
     overflow:hidden;
@@ -430,7 +435,10 @@
     </div>
     <div class="status-msg" id="statusMsg"></div>
   </div>
-  <div class="breadcrumb" id="breadcrumb">Search a city to begin.</div>
+  <div class="breadcrumb">
+    <span id="breadcrumb">Search a city to begin.</span>
+    <span class="refresh-btn" id="refreshBtn" style="display:none;">↻ Refresh from OpenStreetMap</span>
+  </div>
 
   <div class="content">
     <div id="map"></div>
@@ -454,7 +462,7 @@ let sb = null;
 if (configured) {
   sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } else {
-  document.getElementById('breadcrumb').insertAdjacentHTML('afterend', `
+  document.querySelector('.breadcrumb').insertAdjacentHTML('afterend', `
     <div class="config-warning">
       <strong>Not connected yet.</strong><br>
       Add your Supabase project URL and anon key at the top of the script
@@ -478,9 +486,32 @@ let currentSuburb = null;
 
 const statusMsg = document.getElementById('statusMsg');
 const breadcrumb = document.getElementById('breadcrumb');
+const refreshBtn = document.getElementById('refreshBtn');
 const panel = document.getElementById('panel');
 
+let currentCity = null, currentCountry = null, currentBbox = null;
+
 function setStatus(msg){ statusMsg.textContent = msg || ''; }
+
+refreshBtn.addEventListener('click', async () => {
+  if (!currentCity || !configured) return;
+
+  setStatus(`Refreshing ${currentCity} from OpenStreetMap…`);
+
+  try {
+    const rows = await fetchAndSeedFromOverpass(
+      currentCity,
+      currentCountry,
+      currentBbox
+    );
+
+    renderSuburbs(rows);
+    setStatus(`${rows.length} suburb(s) refreshed.`);
+  } catch (err) {
+    console.error(err);
+    setStatus('OpenStreetMap refresh failed — see console.');
+  }
+});
 
 // ---------- Search ----------
 document.getElementById('searchInput').addEventListener('keydown', (e) => {
@@ -503,6 +534,11 @@ async function searchCity(query){
     const stateName = addr.state || '';
     const countryName = addr.country || '';
     breadcrumb.innerHTML = `${[countryName, stateName, cityName].filter(Boolean).join(' <span style="color:#C4C9D2">›</span> ')}`;
+
+    currentCity = cityName;
+    currentCountry = countryName;
+    currentBbox = bbox;
+    refreshBtn.style.display = configured ? 'inline' : 'none';
 
     await loadCitySuburbs(cityName, countryName, bbox);
   } catch (err) {
@@ -548,10 +584,16 @@ async function loadCitySuburbs(cityName, countryName, bbox){
 
 async function fetchAndSeedFromOverpass(cityName, countryName, bbox){
   const [south, north, west, east] = bbox;
+  // Query for informal neighbourhood-level "place" tags directly, rather than
+  // administrative boundaries — admin tiers (wards, freguesias, LGAs, etc.)
+  // vary wildly in meaning by country and often don't match how people
+  // actually refer to neighbourhoods. place=suburb/neighbourhood/quarter is
+  // the convention OSM mappers use worldwide for that informal identity,
+  // whether it's drawn as a polygon or only pinned as a point.
   const query = `[out:json][timeout:25];
     (
-      relation["boundary"="administrative"]["admin_level"~"^(8|9|10)$"](${south},${west},${north},${east});
-      way["boundary"="administrative"]["admin_level"~"^(8|9|10)$"](${south},${west},${north},${east});
+      way["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
+      relation["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
       node["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
     );
     out geom;`;
@@ -563,6 +605,10 @@ async function fetchAndSeedFromOverpass(cityName, countryName, bbox){
   if (!res.ok) throw new Error(`Overpass ${res.status}`);
   const osmData = await res.json();
   const geojson = osmtogeojson(osmData);
+
+  // Prefer polygon geometries over point-only duplicates of the same name
+  const typeRank = { Polygon: 0, MultiPolygon: 0, Point: 1 };
+  geojson.features.sort((a, b) => (typeRank[a.geometry.type] ?? 2) - (typeRank[b.geometry.type] ?? 2));
 
   const seen = new Set();
   const toInsert = [];
@@ -588,7 +634,7 @@ async function fetchAndSeedFromOverpass(cityName, countryName, bbox){
 
   if (toInsert.length === 0) return [];
 
-  const { data, error } = await sb.from('suburbs').upsert(toInsert, { onConflict: 'city,name' }).select();
+  const { data, error } = await sb.from('suburbs').upsert(toInsert, { onConflict: 'osm_type,osm_id' }).select();
   if (error) throw error;
   return data;
 }
