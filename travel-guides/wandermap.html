@@ -593,8 +593,12 @@ async function fetchAndSeedFromOverpass(cityName, countryName, bbox){
   const query = `[out:json][timeout:25];
     (
       way["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
-      relation["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
-      node["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
+relation["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
+
+way["boundary"="administrative"]["name"](${south},${west},${north},${east});
+relation["boundary"="administrative"]["name"](${south},${west},${north},${east});
+
+node["place"~"^(suburb|neighbourhood|quarter)$"](${south},${west},${north},${east});
     );
     out geom;`;
 
@@ -610,16 +614,48 @@ async function fetchAndSeedFromOverpass(cityName, countryName, bbox){
   const typeRank = { Polygon: 0, MultiPolygon: 0, Point: 1 };
   geojson.features.sort((a, b) => (typeRank[a.geometry.type] ?? 2) - (typeRank[b.geometry.type] ?? 2));
 
-  const seen = new Set();
-  const toInsert = [];
-  geojson.features.forEach((f, i) => {
+  const byName = {};
+
+geojson.features.forEach(f => {
+  const name =
+    f.properties?.name ||
+    f.properties?.tags?.name;
+
+  if (!name || !f.geometry) return;
+
+  const isPolygon =
+    f.geometry.type === 'Polygon' ||
+    f.geometry.type === 'MultiPolygon';
+
+  if (!byName[name]) {
+    byName[name] = f;
+    return;
+  }
+
+  const existingIsPolygon =
+    byName[name].geometry.type === 'Polygon' ||
+    byName[name].geometry.type === 'MultiPolygon';
+
+  // Replace point with polygon
+  if (isPolygon && !existingIsPolygon) {
+    byName[name] = f;
+  }
+});
+
+
+const toInsert = [];
+
+Object.values(byName).forEach(f => {
     const name = f.properties && (f.properties.name || (f.properties.tags && f.properties.tags.name));
     if (!name || seen.has(name)) return;
     if (!f.geometry) return;
     seen.add(name);
     toInsert.push({
       osm_id: f.id ? Number(String(f.id).replace(/\D/g, '')) || null : null,
-      osm_type: f.properties && f.properties.type,
+      osm_type: f.type === 'relation' ? 'relation' :
+          f.type === 'way' ? 'way' :
+          f.type === 'node' ? 'node' :
+          null,
       city: cityName,
       country: countryName || null,
       name: name,
